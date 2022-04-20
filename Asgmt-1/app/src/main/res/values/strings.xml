@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Assignment-1</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="btn_back">BACK</string>
+    <string name="btn_new">NEW</string>
+    <string name="btn_register">ENTER</string>
+    <string name="btn_deregister">LEAVE</string>
+    <string name="btn_groups">GROUPS</string>
+    <string name="placeholder_group_name">GroupName</string>
+    <string name="top_groups">Groups</string>
 </resources>
