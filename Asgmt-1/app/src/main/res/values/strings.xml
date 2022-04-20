@@ -6,6 +6,7 @@
     <string name="btn_register">ENTER</string>
     <string name="btn_deregister">LEAVE</string>
     <string name="btn_groups">GROUPS</string>
-    <string name="placeholder_group_name">GroupName</string>
+    <string name="placeholder_groupname">Group name</string>
     <string name="top_groups">Groups</string>
+    <string name="placeholder_username">Username</string>
 </resources>

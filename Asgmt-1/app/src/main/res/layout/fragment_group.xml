@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:hint="@string/placeholder_group_name"
+            android:hint="@string/placeholder_groupname"
             android:textColorHint="@color/white"
             android:textSize="28sp"
             android:textStyle="bold"

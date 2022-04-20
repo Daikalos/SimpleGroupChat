@@ -3,4 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="@string/placeholder_username"
+        android:paddingLeft="4dp"
+        android:paddingTop="2dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="2dp"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="20sp" />
 </LinearLayout>
