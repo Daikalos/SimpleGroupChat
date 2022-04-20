@@ -11,6 +11,9 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class GroupListFragment extends Fragment
 {
@@ -19,6 +22,23 @@ public class GroupListFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
+        initializeComponents(view);
+        initializeListeners(view);
+
+        return view;
+    }
+
+    private void initializeComponents(View view)
+    {
+        final MainViewModel viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        final RecyclerView rvGroups = view.findViewById(R.id.rvGroups);
+        rvGroups.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvGroups.setAdapter(new GroupAdapter(getContext(), viewModel));
+    }
+
+    private void initializeListeners(View view)
+    {
         final Button btnBack = view.findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener()
         {
@@ -65,11 +85,7 @@ public class GroupListFragment extends Fragment
                 dialog.setView(editText);
 
                 dialog.show();
-
-
             }
         });
-
-        return view;
     }
 }
