@@ -81,7 +81,7 @@ public class GroupListFragment extends Fragment
                 EditText editText = new EditText(requireContext());
 
                 AlertDialog dialog = builder.create();
-                dialog.setTitle("Enter Group Name");
+                dialog.setTitle("Enter group name");
                 dialog.setView(editText);
 
                 dialog.show();

@@ -9,10 +9,24 @@
         android:id="@+id/top_layout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/teal_400"
+        android:background="@color/blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="@color/dark_blue"
+            android:hint="@string/btn_back"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvGroupName"
@@ -40,29 +54,32 @@
         android:id="@+id/bot_layout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/teal_400"
+        android:background="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/btnBack"
+            android:id="@+id/btnChat"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="5dp"
-            android:backgroundTint="@color/purple_500"
-            android:hint="@string/btn_back"
+            android:backgroundTint="@color/dark_blue"
+            android:hint="@string/btn_chat"
+            android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
         <Button
             android:id="@+id/btnAction"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginEnd="5dp"
+            android:backgroundTint="@color/dark_blue"
             android:hint="@string/btn_register"
             android:textColor="@color/white"
             android:textColorHint="@color/white"

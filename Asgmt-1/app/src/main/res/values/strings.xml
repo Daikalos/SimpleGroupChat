@@ -7,6 +7,10 @@
     <string name="btn_deregister">LEAVE</string>
     <string name="btn_groups">GROUPS</string>
     <string name="placeholder_groupname">Group name</string>
-    <string name="top_groups">Groups</string>
+    <string name="view_groups">Groups</string>
     <string name="placeholder_username">Username</string>
+    <string name="placeholder_message">type here</string>
+    <string name="desc_upload">upload image</string>
+    <string name="btn_chat">CHAT</string>
+    <string name="placeholder_groupcount">0/20</string>
 </resources>

@@ -9,17 +9,31 @@
         android:id="@+id/top_layout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/teal_400"
+        android:background="@color/blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="@color/dark_blue"
+            android:hint="@string/btn_back"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvGroups"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:hint="@string/top_groups"
+            android:hint="@string/view_groups"
             android:textColorHint="@color/white"
             android:textSize="28sp"
             android:textStyle="bold"
@@ -42,36 +56,35 @@
         android:id="@+id/bot_layout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/teal_400"
+        android:background="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/btnBack"
+        <TextView
+            android:id="@+id/tvGroupCount"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="5dp"
-            android:backgroundTint="@color/purple_500"
-            android:hint="@string/btn_back"
-            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:hint="@string/placeholder_groupcount"
             android:textColorHint="@color/white"
-            android:textSize="20sp"
+            android:textSize="28sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/btnNew"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:layout_marginEnd="5dp"
-            android:backgroundTint="@color/purple_500"
+            android:layout_marginStart="4dp"
+            android:backgroundTint="@color/dark_blue"
             android:hint="@string/btn_new"
             android:textColorHint="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,10 +28,11 @@ public class GroupHolder extends RecyclerView.ViewHolder implements View.OnClick
     {
         FragmentTransaction transaction = ((AppCompatActivity)context).getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fcvMain, new GroupFragment());
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
-    public TextView getGroupName()
+    public TextView getGroupNameView()
     {
         return tvGroupName;
     }
