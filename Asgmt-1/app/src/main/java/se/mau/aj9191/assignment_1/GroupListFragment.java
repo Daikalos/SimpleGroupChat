@@ -1,6 +1,7 @@
 package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -27,7 +29,7 @@ public class GroupListFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
         initializeComponents(view);
-        registerListeners();
+        registerListeners(view);
 
         return view;
     }
@@ -44,7 +46,7 @@ public class GroupListFragment extends Fragment
         rvGroups.setAdapter(new GroupAdapter(getContext(), viewModel));
     }
 
-    private void registerListeners()
+    private void registerListeners(View view)
     {
         btnBack.setOnClickListener(new View.OnClickListener()
         {
@@ -83,11 +85,24 @@ public class GroupListFragment extends Fragment
                     }
                 });
 
-                EditText editText = new EditText(requireContext());
+                Context context = view.getContext();
+
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(32, 32, 32, 32);
+
+                EditText edGroup = new EditText(getContext());
+                edGroup.setHint("enter group name");
+
+                EditText edUsername = new EditText(getContext());
+                edUsername.setHint("enter user name");
+
+                layout.addView(edGroup);
+                layout.addView(edUsername);
 
                 AlertDialog dialog = builder.create();
-                dialog.setTitle("Enter group name");
-                dialog.setView(editText);
+                dialog.setTitle("Create group");
+                dialog.setView(layout);
 
                 dialog.show();
             }

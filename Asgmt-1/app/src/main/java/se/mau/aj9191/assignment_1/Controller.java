@@ -9,16 +9,23 @@ import android.os.IBinder;
 
 public class Controller
 {
+    private MainActivity mainActivity;
+
     private NetworkService networkService;
     private boolean bound = false;
 
-    private MainActivity mainActivity;
+    private Listener listener;
+    private boolean isListenerRunning = false;
 
     public Controller(MainActivity mainActivity, Bundle savedInstanceState)
     {
         this.mainActivity = mainActivity;
 
         Intent intent = new Intent(mainActivity, NetworkService.class);
+
+        if (savedInstanceState == null)
+            mainActivity.startService(intent);
+
         mainActivity.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -48,4 +55,9 @@ public class Controller
             bound = false;
         }
     };
+
+    private class Listener extends Thread
+    {
+
+    }
 }

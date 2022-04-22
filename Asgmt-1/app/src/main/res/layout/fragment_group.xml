@@ -20,12 +20,12 @@
             android:layout_height="48dp"
             android:layout_marginEnd="5dp"
             android:backgroundTint="@color/dark_blue"
+            android:text="@string/btn_back"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/btn_back" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvGroupName"
@@ -64,13 +64,13 @@
             android:layout_height="48dp"
             android:layout_marginStart="5dp"
             android:backgroundTint="@color/dark_blue"
+            android:text="@string/btn_chat"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:text="@string/btn_chat" />
+            app:layout_constraintVertical_bias="0.0" />
 
         <Button
             android:id="@+id/btnAction"
@@ -78,12 +78,12 @@
             android:layout_height="48dp"
             android:layout_marginEnd="5dp"
             android:backgroundTint="@color/dark_blue"
+            android:text="@string/btn_register"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/btn_register" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

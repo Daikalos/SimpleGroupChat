@@ -1,11 +1,14 @@
 package se.mau.aj9191.assignment_1;
 
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -16,19 +19,32 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback
 {
-    MapView mapView;
-    GoogleMap map;
+    private MapView mapView;
+    private GoogleMap map;
+
+    private Button btnGroups;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
     {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
+        initializeComponents(view, savedInstance);
+        registerListeners();
+
+        return view;
+    }
+
+    private void initializeComponents(View view, Bundle savedInstance)
+    {
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstance);
         mapView.getMapAsync(this);
 
-        Button btnGroups = view.findViewById(R.id.btnGroups);
+        btnGroups = view.findViewById(R.id.btnGroups);
+    }
+    private void registerListeners()
+    {
         btnGroups.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -40,14 +56,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
                 transaction.commit();
             }
         });
-
-        return view;
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         map = googleMap;
+
+        try
+        {
+            map.setMyLocationEnabled(true);
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

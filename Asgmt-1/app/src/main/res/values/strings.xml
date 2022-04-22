@@ -13,4 +13,6 @@
     <string name="desc_upload">upload image</string>
     <string name="btn_chat">CHAT</string>
     <string name="placeholder_groupcount">0/20</string>
+    <string name="btn_language_swe">SWEDISH</string>
+    <string name="btn_language_eng">ENGLISH</string>
 </resources>
