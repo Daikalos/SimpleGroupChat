@@ -21,6 +21,8 @@ public class GroupHolder extends RecyclerView.ViewHolder implements View.OnClick
 
         this.context = context;
         tvGroupName = itemView.findViewById(R.id.tvGroupName);
+
+        getAdapterPosition();
     }
 
     @Override

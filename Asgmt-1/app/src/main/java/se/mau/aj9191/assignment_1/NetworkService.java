@@ -76,7 +76,7 @@ public class NetworkService extends Service
         executorService.execute(new Disconnect());
     }
 
-    public void send(String message)
+    public void sendMessage(String message)
     {
         executorService.execute(new Send(message));
     }
@@ -183,11 +183,11 @@ public class NetworkService extends Service
     }
     private class Send implements Runnable
     {
-        private String obj;
+        private String jsonMessage;
 
-        public Send(String obj)
+        public Send(String jsonMessage)
         {
-            this.obj = obj;
+            this.jsonMessage = jsonMessage;
         }
 
         @Override
@@ -195,7 +195,7 @@ public class NetworkService extends Service
         {
             try
             {
-                dataOutputStream.writeUTF(obj);
+                dataOutputStream.writeUTF(jsonMessage);
                 dataOutputStream.flush();
             }
             catch (IOException e)
