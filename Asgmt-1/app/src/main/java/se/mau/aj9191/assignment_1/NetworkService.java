@@ -24,13 +24,27 @@ public class NetworkService extends Service
     private ObjectOutputStream output;
     private InetAddress address;
 
+    private boolean connected = false;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
+
+    public boolean isConnected()
+    {
+        return connected;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        super.onStartCommand(intent, flags, startId);
+        connect();
+        return START_STICKY;
+    }
 
     @Override
     public void onCreate()
     {
         super.onCreate();
-        connect();
     }
     @Override
     public void onDestroy()
@@ -67,6 +81,7 @@ public class NetworkService extends Service
         return super.onUnbind(intent);
     }
 
+
     private class Connect implements Runnable
     {
         @Override
@@ -79,6 +94,8 @@ public class NetworkService extends Service
                 input = new ObjectInputStream(socket.getInputStream());
                 output = new ObjectOutputStream(socket.getOutputStream());
                 output.flush();
+
+                connected = true;
             }
             catch (Exception e)
             {
@@ -99,6 +116,8 @@ public class NetworkService extends Service
                     output.close();
                 if (socket != null)
                     socket.close();
+
+                connected = false;
             }
             catch (IOException e)
             {

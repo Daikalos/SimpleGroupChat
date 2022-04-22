@@ -17,19 +17,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class GroupListFragment extends Fragment
 {
+    private Button btnBack;
+    private Button btnNew;
+    private RecyclerView rvGroups;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
     {
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
         initializeComponents(view);
-        initializeListeners(view);
+        registerListeners();
 
         return view;
     }
 
     private void initializeComponents(View view)
     {
+        btnBack = view.findViewById(R.id.btnBack);
+        btnNew = view.findViewById(R.id.btnNew);
+
         final MainViewModel viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         final RecyclerView rvGroups = view.findViewById(R.id.rvGroups);
@@ -37,9 +44,8 @@ public class GroupListFragment extends Fragment
         rvGroups.setAdapter(new GroupAdapter(getContext(), viewModel));
     }
 
-    private void initializeListeners(View view)
+    private void registerListeners()
     {
-        final Button btnBack = view.findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -53,7 +59,6 @@ public class GroupListFragment extends Fragment
             }
         });
 
-        final Button btnNew = view.findViewById(R.id.btnNew);
         btnNew.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -61,7 +66,7 @@ public class GroupListFragment extends Fragment
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
-                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener()
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)

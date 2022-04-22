@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 
 public class Controller
@@ -13,7 +14,7 @@ public class Controller
 
     private MainActivity mainActivity;
 
-    public Controller(MainActivity mainActivity)
+    public Controller(MainActivity mainActivity, Bundle savedInstanceState)
     {
         this.mainActivity = mainActivity;
 
@@ -28,9 +29,7 @@ public class Controller
     public void onDestroy()
     {
         if (bound)
-        {
             mainActivity.unbindService(serviceConnection);
-        }
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection()

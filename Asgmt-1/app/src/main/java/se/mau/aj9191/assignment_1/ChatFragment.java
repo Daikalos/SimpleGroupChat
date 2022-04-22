@@ -14,25 +14,28 @@ import androidx.fragment.app.Fragment;
 
 public class ChatFragment extends Fragment
 {
+    private EditText messageField;
+    private Button btnUpload;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
     {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         initializeComponents(view);
-        initializeListeners(view);
+        registerListeners();
 
         return view;
     }
 
     private void initializeComponents(View view)
     {
-
+        messageField = view.findViewById(R.id.etMessage);
+        btnUpload = view.findViewById(R.id.btnUpload);
     }
 
-    private void initializeListeners(View view)
+    private void registerListeners()
     {
-        final EditText messageField = view.findViewById(R.id.etMessage);
         messageField.setOnEditorActionListener(new TextView.OnEditorActionListener()
         {
             @Override
@@ -49,7 +52,6 @@ public class ChatFragment extends Fragment
             }
         });
 
-        final Button btnUpload = view.findViewById(R.id.btnChat);
         btnUpload.setOnClickListener(new View.OnClickListener()
         {
             @Override

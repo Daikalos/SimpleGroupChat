@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity
 {
     private Controller controller;
-    private boolean bound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -20,7 +19,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        controller = new Controller(this);
+        controller = new Controller(this, savedInstanceState);
     }
 
     @Override
