@@ -42,14 +42,18 @@ public class MainViewModel extends ViewModel
     {
         this.groups.postValue(groups);
     }
+    public void setLocation(String id, double longitude, double latitude)
+    {
+
+    }
     public void updateLocations(Pair<String, Location[]> locations)
     {
         this.locations.postValue(locations);
     }
 
-    public void setLocation(String id, double longitude, double latitude)
+    public boolean enteredGroup(String groupName)
     {
-
+        return enteredGroups.containsValue(groupName);
     }
 
     public LiveData<String> getRegisterLiveData()

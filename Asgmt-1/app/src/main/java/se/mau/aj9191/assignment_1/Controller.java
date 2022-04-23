@@ -29,10 +29,6 @@ public class Controller
         mainActivity.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public void onResume()
-    {
-
-    }
     public void onDestroy()
     {
         if (bound)

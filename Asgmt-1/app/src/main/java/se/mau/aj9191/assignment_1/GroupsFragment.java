@@ -105,10 +105,5 @@ public class GroupsFragment extends Fragment
 
             dialog.show();
         });
-
-        viewModel.getRegisterLiveData().observe(getViewLifecycleOwner(), s ->
-        {
-            rvGroups.getAdapter().notifyDataSetChanged();
-        });
     }
 }
