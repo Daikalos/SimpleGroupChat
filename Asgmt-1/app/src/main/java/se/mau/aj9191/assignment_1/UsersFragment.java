@@ -13,12 +13,18 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class GroupFragment extends Fragment
+public class UsersFragment extends Fragment
 {
     private ImageButton btnBack;
     private Button btnChat;
-
     private RecyclerView rvUsers;
+
+    private final String groupName;
+
+    public UsersFragment(String groupName)
+    {
+        this.groupName = groupName;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
@@ -38,7 +44,7 @@ public class GroupFragment extends Fragment
 
         rvUsers = view.findViewById(R.id.rvUsers);
         rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvUsers.setAdapter(new GroupAdapter(getContext(), new ViewModelProvider(requireActivity()).get(MainViewModel.class)));
+        rvUsers.setAdapter(new UsersAdapter(new ViewModelProvider(requireActivity()).get(MainViewModel.class), this));
     }
 
     private void registerListeners()
@@ -48,7 +54,7 @@ public class GroupFragment extends Fragment
             getParentFragmentManager().popBackStack();
 
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fcvMain, new GroupListFragment());
+            transaction.replace(R.id.fcvMain, new GroupsFragment());
             transaction.commit();
         });
     }

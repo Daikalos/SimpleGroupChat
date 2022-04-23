@@ -2,8 +2,6 @@ package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class GroupListFragment extends Fragment
+public class GroupsFragment extends Fragment
 {
+    private MainViewModel viewModel;
+
     private ImageButton btnBack;
     private Button btnNew;
-
     private RecyclerView rvGroups;
 
     @Override
@@ -39,14 +38,21 @@ public class GroupListFragment extends Fragment
 
     private void initializeComponents(View view)
     {
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
         btnBack = view.findViewById(R.id.btnBack);
         btnNew = view.findViewById(R.id.btnNew);
 
-        final MainViewModel viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
         final RecyclerView rvGroups = view.findViewById(R.id.rvGroups);
         rvGroups.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvGroups.setAdapter(new GroupAdapter(getContext(), viewModel));
+        rvGroups.setAdapter(new GroupsAdapter(viewModel, getViewLifecycleOwner()));
+
+        Controller.sendMessage(JsonHelper.sendGetGroups());
+
+        viewModel.getRegisterLiveData().observe(getViewLifecycleOwner(), s ->
+        {
+            rvGroups.getAdapter().notifyDataSetChanged();
+        });
     }
 
     private void registerListeners(Context context)
@@ -64,12 +70,6 @@ public class GroupListFragment extends Fragment
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
-            builder.setPositiveButton("OK", (dialogInterface, i) ->
-            {
-
-            });
-            builder.setNegativeButton("Cancel", null);
-
             LinearLayout layout = new LinearLayout(context);
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setPadding(32, 32, 32, 32);
@@ -79,6 +79,15 @@ public class GroupListFragment extends Fragment
 
             EditText edUsername = new EditText(getContext());
             edUsername.setHint("enter user name");
+
+            builder.setPositiveButton("OK", (dialogInterface, i) ->
+            {
+                String groupName = edGroup.getText().toString();
+                String username = edUsername.getText().toString();
+
+                Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
+            });
+            builder.setNegativeButton("Cancel", null);
 
             layout.addView(edGroup);
             layout.addView(edUsername);

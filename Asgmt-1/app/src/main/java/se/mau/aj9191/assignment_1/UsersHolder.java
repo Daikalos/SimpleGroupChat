@@ -5,9 +5,9 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class UserHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+public class UsersHolder extends RecyclerView.ViewHolder implements View.OnClickListener
 {
-    public UserHolder(@NonNull View itemView)
+    public UsersHolder(@NonNull View itemView)
     {
         super(itemView);
     }

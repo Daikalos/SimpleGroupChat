@@ -2,16 +2,17 @@ package se.mau.aj9191.assignment_1;
 
 public class User
 {
-    private final String id;
-    public double longitude, latitude;
+    private final String name;
+    public Coordinate coordinate;
 
-    public User(String id)
+    public User(String name, Coordinate coordinate)
     {
-        this.id = id;
+        this.name = name;
+        this.coordinate = coordinate;
     }
 
     public String getId()
     {
-        return id;
+        return name;
     }
 }

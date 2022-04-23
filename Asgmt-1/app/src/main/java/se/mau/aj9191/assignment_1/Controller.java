@@ -6,16 +6,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
-
-import androidx.lifecycle.ViewModelProvider;
 
 public class Controller
 {
     private MainActivity mainActivity;
     private MainViewModel viewModel;
 
-    private NetworkService networkService;
+    private static NetworkService networkService;
     private boolean bound = false;
 
     private Listener listener;
@@ -45,7 +42,7 @@ public class Controller
         }
     }
 
-    public void sendMessage(String message)
+    public static void sendMessage(String message)
     {
         networkService.sendMessage(message);
     }
@@ -86,8 +83,8 @@ public class Controller
             {
                 while (isRunning)
                 {
-                    String message = networkService.receiveMessage();
-                    JSONParser.parseType(viewModel, message);
+                    String message = networkService.getMessage();
+                    JsonHelper.parseType(viewModel, message);
                 }
             }
             catch (Exception e)

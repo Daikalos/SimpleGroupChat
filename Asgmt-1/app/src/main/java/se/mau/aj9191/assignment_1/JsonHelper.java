@@ -11,62 +11,69 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-public class JSONParser
+public class JsonHelper
 {
-    public static void parseType(MainViewModel viewModel, String jsonMessage) throws JSONException
+    public static void parseType(MainViewModel viewModel, String jsonMessage)
     {
-        JSONObject obj = new JSONObject(jsonMessage);
-        String type = obj.get("type").toString();
-
-        switch (type)
+        try
         {
-            case "register":
-                parseRegister(viewModel, obj);
-                break;
-            case "unregister":
-                parseUnregister(viewModel, obj);
-                break;
-            case "members":
-                parseMembers(viewModel, obj);
-                break;
-            case "groups":
-                parseGroups(viewModel, obj);
-                break;
-            case "location":
-                parseSetLocation(viewModel, obj);
-                break;
-            case "locations":
-                parseLocations(viewModel, obj);
-                break;
-            case "textchat":
-                parseEnterText(viewModel, obj);
-                break;
-            case "upload":
-                parseEnterImage(viewModel, obj);
-                break;
-            case "imagechat":
-                parseReceiveImage(viewModel, obj);
-                break;
-            case "exception":
-                parseException(obj);
-                break;
-            default:
-                Log.d("error", "unknown type: " + type);
-                break;
+            JSONObject obj = new JSONObject(jsonMessage);
+            String type = obj.get("type").toString();
+
+            switch (type)
+            {
+                case "register":
+                    parseRegister(viewModel, obj);
+                    break;
+                case "unregister":
+                    parseUnregister(viewModel, obj);
+                    break;
+                case "members":
+                    parseMembers(viewModel, obj);
+                    break;
+                case "groups":
+                    parseGroups(viewModel, obj);
+                    break;
+                case "location":
+                    parseSetLocation(viewModel, obj);
+                    break;
+                case "locations":
+                    parseLocations(viewModel, obj);
+                    break;
+                case "textchat":
+                    parseEnterText(viewModel, obj);
+                    break;
+                case "upload":
+                    parseEnterImage(viewModel, obj);
+                    break;
+                case "imagechat":
+                    parseReceiveImage(viewModel, obj);
+                    break;
+                case "exception":
+                    parseException(obj);
+                    break;
+                default:
+                    Log.d("error", "unknown type: " + type);
+                    break;
+            }
+        }
+        catch (JSONException e)
+        {
+            Log.d("error", e.getMessage());
         }
     }
 
     public static void parseRegister(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
+        String group = jsonObject.getString("group");
         String id = jsonObject.getString("id");
 
-
+        viewModel.register(group, id);
     }
     public static void parseUnregister(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String id = jsonObject.getString("id");
-
-
+        viewModel.unregister(id);
     }
     public static void parseMembers(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -76,7 +83,7 @@ public class JSONParser
         for (int i = 0; i < arr.length(); ++i)
             result.add(arr.getString(i));
 
-
+        viewModel.showMembers(result);
     }
     public static void parseGroups(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -86,7 +93,7 @@ public class JSONParser
         for (int i = 0; i < arr.length(); ++i)
             result.add(arr.getString(i));
 
-        viewModel.updateGroups(result);
+        viewModel.showGroups(result);
     }
     public static void parseSetLocation(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -108,6 +115,8 @@ public class JSONParser
             String member = jsonObject.getString("member");
             double longitude = jsonObject.getDouble("longitude");
             double latitude = jsonObject.getDouble("latitude");
+
+
         }
 
 
@@ -152,86 +161,134 @@ public class JSONParser
         Log.d("error", exception);
     }
 
-    public static String register(String group, String member) throws IOException
+    public static String sendRegister(String group, String member)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("register")
-                .name("group").value(group)
-                .name("member").value(member);
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("register")
+                    .name("group").value(group)
+                    .name("member").value(member).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
+        return stringWriter.toString();
+    }
+    public static String sendUnregister(String id)
+    {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("unregister")
+                    .name("id").value(id).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }
-    public static String unregister(String id) throws IOException
+    public static String sendGetMembers(String groupName)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("unregister")
-                .name("id").value(id);
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("members")
+                    .name("group").value(groupName).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }
-    public static String members(String groupName) throws IOException
+    public static String sendGetGroups()
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("members")
-                .name("group").value(groupName).endObject();
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("groups").endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }
-    public static String groups() throws IOException
+    public static String sendSetLocation(String id, double longitude, double latitude)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("groups").endObject();
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("location")
+                    .name("id").value(id)
+                    .name("longitude").value(longitude)
+                    .name("latitude").value(latitude).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }
-    public static String setLocation(String id, double longitude, double latitude) throws IOException
+    public static String sendEnterText(String id, String text)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("location")
-                .name("id").value(id)
-                .name("longitude").value(longitude)
-                .name("latitude").value(latitude).endObject();
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("textchat")
+                    .name("id").value(id)
+                    .name("text").value(text).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }
-    public static String enterText(String id, String text) throws IOException
+    public static String sendEnterImage(String id, String text, double longitude, double latitude)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
 
-        writer.beginObject()
-                .name("type").value("textchat")
-                .name("id").value(id)
-                .name("text").value(text).endObject();
-
-        return stringWriter.toString();
-    }
-    public static String enterImage(String id, String text, double longitude, double latitude) throws IOException
-    {
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter writer = new JsonWriter(stringWriter);
-
-        writer.beginObject()
-                .name("type").value("imagechat")
-                .name("id").value(id)
-                .name("text").value(text)
-                .name("longitude").value(longitude)
-                .name("latitude").value(latitude).endObject();
+        try
+        {
+            writer.beginObject()
+                    .name("type").value("imagechat")
+                    .name("id").value(id)
+                    .name("text").value(text)
+                    .name("longitude").value(longitude)
+                    .name("latitude").value(latitude).endObject();
+        }
+        catch (IOException exception)
+        {
+            exception.printStackTrace();
+        }
 
         return stringWriter.toString();
     }

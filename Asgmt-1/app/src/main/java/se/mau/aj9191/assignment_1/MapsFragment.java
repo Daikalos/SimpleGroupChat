@@ -1,18 +1,16 @@
 package se.mau.aj9191.assignment_1;
 
-import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -20,6 +18,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback
 {
+    private LocationManager locationManager;
+    private MainViewModel viewModel;
+
     private MapView mapView;
     private GoogleMap map;
 
@@ -39,16 +40,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
         return view;
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration config)
-    {
-        super.onConfigurationChanged(config);
-
-
-    }
-
     private void initializeComponents(View view, Bundle savedInstance)
     {
+        locationManager = view.getContext().getSystemService(LocationManager.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstance);
         mapView.getMapAsync(this);
@@ -61,7 +57,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
         btnGroups.setOnClickListener(view ->
         {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fcvMain, new GroupListFragment());
+            transaction.replace(R.id.fcvMain, new GroupsFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -81,15 +77,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         map = googleMap;
-
-        try
-        {
-            map.setMyLocationEnabled(true);
-        }
-        catch (SecurityException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     @Override

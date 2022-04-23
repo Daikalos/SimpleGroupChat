@@ -38,6 +38,8 @@ public class NetworkService extends Service
     private String receiveString;
     private boolean isReceiving = false;
 
+    private final Object object = new Object();
+
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
 
     @Override
@@ -68,10 +70,15 @@ public class NetworkService extends Service
     {
         executorService.execute(new Send(message));
     }
-    public String receiveMessage() throws InterruptedException
+    public String getMessage() throws InterruptedException
     {
         while (receiveString == null || receiveString.isEmpty())
-            wait();
+        {
+            synchronized (object)
+            {
+                object.wait();
+            }
+        }
 
         String result = receiveString;
         receiveString = "";
@@ -166,6 +173,11 @@ public class NetworkService extends Service
                 while (isReceiving)
                 {
                     receiveString = dataInputStream.readUTF();
+
+                    synchronized (object)
+                    {
+                        object.notifyAll();
+                    }
                 }
             }
             catch (Exception e)
