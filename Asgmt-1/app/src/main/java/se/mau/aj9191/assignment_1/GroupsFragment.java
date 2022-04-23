@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,7 +33,7 @@ public class GroupsFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
         initializeComponents(view);
-        registerListeners(view.getContext());
+        registerListeners();
 
         return view;
     }
@@ -55,7 +57,7 @@ public class GroupsFragment extends Fragment
         });
     }
 
-    private void registerListeners(Context context)
+    private void registerListeners()
     {
         btnBack.setOnClickListener(view ->
         {
@@ -70,7 +72,7 @@ public class GroupsFragment extends Fragment
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
-            LinearLayout layout = new LinearLayout(context);
+            LinearLayout layout = new LinearLayout(requireContext());
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setPadding(32, 32, 32, 32);
 
@@ -85,7 +87,18 @@ public class GroupsFragment extends Fragment
                 String groupName = edGroup.getText().toString();
                 String username = edUsername.getText().toString();
 
+                if (groupName.isEmpty() || username.isEmpty())
+                {
+                    Toast.makeText(requireContext(), "empty string", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
+
+                FragmentTransaction transaction = ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fcvMain, new UsersFragment(groupName));
+                transaction.addToBackStack(null);
+                transaction.commit();
             });
             builder.setNegativeButton("Cancel", null);
 
