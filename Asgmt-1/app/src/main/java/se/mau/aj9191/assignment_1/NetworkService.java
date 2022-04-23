@@ -38,14 +38,7 @@ public class NetworkService extends Service
     private String receiveString;
     private boolean isReceiving = false;
 
-    private boolean connected = false;
-
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
-
-    public boolean getIsConnected()
-    {
-        return connected;
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
@@ -55,11 +48,6 @@ public class NetworkService extends Service
         return START_STICKY;
     }
 
-    @Override
-    public void onCreate()
-    {
-        super.onCreate();
-    }
     @Override
     public void onDestroy()
     {
@@ -80,9 +68,15 @@ public class NetworkService extends Service
     {
         executorService.execute(new Send(message));
     }
-    public String receive()
+    public String receiveMessage() throws InterruptedException
     {
-        return receiveString;
+        while (receiveString == null || receiveString.isEmpty())
+            wait();
+
+        String result = receiveString;
+        receiveString = "";
+
+        return result;
     }
 
     public class NetworkBinder extends Binder
@@ -121,7 +115,6 @@ public class NetworkService extends Service
                 dataOutputStream = new DataOutputStream(outputStream);
 
                 isReceiving = true;
-                connected = true;
 
                 receive = new Receive();
                 receive.start();
@@ -153,8 +146,8 @@ public class NetworkService extends Service
                 if (socket != null)
                     socket.close();
 
+                receive.interrupt();
                 isReceiving = false;
-                connected = false;
             }
             catch (IOException e)
             {
@@ -200,7 +193,7 @@ public class NetworkService extends Service
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                Log.d("error", e.getMessage());
             }
         }
     }

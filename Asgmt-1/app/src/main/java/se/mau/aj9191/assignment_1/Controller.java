@@ -6,26 +6,29 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+
+import androidx.lifecycle.ViewModelProvider;
 
 public class Controller
 {
     private MainActivity mainActivity;
+    private MainViewModel viewModel;
 
     private NetworkService networkService;
     private boolean bound = false;
 
     private Listener listener;
-    private boolean isListenerRunning = false;
 
-    public Controller(MainActivity mainActivity, Bundle savedInstanceState)
+    public Controller(MainActivity mainActivity, MainViewModel viewModel, Bundle savedInstanceState)
     {
         this.mainActivity = mainActivity;
+        this.viewModel = viewModel;
 
         Intent intent = new Intent(mainActivity, NetworkService.class);
 
         if (savedInstanceState == null)
             mainActivity.startService(intent);
-
         mainActivity.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -36,7 +39,15 @@ public class Controller
     public void onDestroy()
     {
         if (bound)
+        {
             mainActivity.unbindService(serviceConnection);
+            listener.shutdown();;
+        }
+    }
+
+    public void sendMessage(String message)
+    {
+        networkService.sendMessage(message);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection()
@@ -47,6 +58,9 @@ public class Controller
             NetworkService.NetworkBinder binder = (NetworkService.NetworkBinder)iBinder;
             networkService = binder.getService();
             bound = true;
+
+            listener = new Listener();
+            listener.start();
         }
 
         @Override
@@ -58,6 +72,28 @@ public class Controller
 
     private class Listener extends Thread
     {
+        private boolean isRunning = true;
 
+        public void shutdown()
+        {
+            interrupt();
+        }
+
+        @Override
+        public void run()
+        {
+            try
+            {
+                while (isRunning)
+                {
+                    String message = networkService.receiveMessage();
+                    JSONParser.parseType(viewModel, message);
+                }
+            }
+            catch (Exception e)
+            {
+                isRunning = false;
+            }
+        }
     }
 }

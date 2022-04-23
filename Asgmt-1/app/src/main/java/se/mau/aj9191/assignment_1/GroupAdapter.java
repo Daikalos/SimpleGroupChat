@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class GroupAdapter extends RecyclerView.Adapter<GroupHolder>
 {
     private final Context context;

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Assignment-1</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="desc_back">tillbaka</string>
+    <string name="btn_new">NY GRUPP</string>
+    <string name="btn_register">GÅ MED</string>
+    <string name="btn_deregister">LÄMNA</string>
+    <string name="btn_groups">GRUPPER</string>
+    <string name="placeholder_groupname">Grupp namn</string>
+    <string name="view_groups">Grupper</string>
+    <string name="placeholder_username">Användarnamn</string>
+    <string name="placeholder_message">Skriv här</string>
+    <string name="desc_upload">Ladda upp bild</string>
+    <string name="btn_chat">CHATTA</string>
+    <string name="placeholder_groupcount">0/20</string>
+    <string name="btn_language">ENGELSKA</string>
+</resources>

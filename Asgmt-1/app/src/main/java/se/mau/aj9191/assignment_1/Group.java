@@ -4,26 +4,15 @@ import java.util.ArrayList;
 
 public class Group
 {
-    private final String id, name;
-    private final ArrayList<User> members;
+    private final String name;
 
-    public Group(String id, String name, ArrayList<User> members)
+    public Group(String name)
     {
-        this.id = id;
         this.name = name;
-        this.members = members;
     }
 
-    public String getId()
-    {
-        return id;
-    }
     public String getName()
     {
         return name;
-    }
-    public ArrayList<User> getMembers()
-    {
-        return members;
     }
 }

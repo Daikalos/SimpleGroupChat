@@ -2,20 +2,16 @@ package se.mau.aj9191.assignment_1;
 
 public class User
 {
-    private final String name, groupId;
+    private final String id;
+    public double longitude, latitude;
 
-    public User(String name, String groupId)
+    public User(String id)
     {
-        this.name = name;
-        this.groupId = groupId;
+        this.id = id;
     }
 
-    public String getName()
+    public String getId()
     {
-        return name;
-    }
-    public String getGroupId()
-    {
-        return groupId;
+        return id;
     }
 }

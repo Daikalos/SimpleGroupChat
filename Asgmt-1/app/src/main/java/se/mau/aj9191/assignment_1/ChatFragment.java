@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -15,7 +16,7 @@ import androidx.fragment.app.Fragment;
 public class ChatFragment extends Fragment
 {
     private EditText messageField;
-    private Button btnUpload;
+    private ImageButton btnUpload;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
@@ -36,29 +37,21 @@ public class ChatFragment extends Fragment
 
     private void registerListeners()
     {
-        messageField.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        messageField.setOnEditorActionListener((textView, i, keyEvent) ->
         {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent)
+            boolean handled = false;
+            if (i == EditorInfo.IME_ACTION_SEND)
             {
-                boolean handled = false;
-                if (i == EditorInfo.IME_ACTION_SEND)
-                {
-                    sendMessage(messageField.getText().toString());
-                    messageField.setText("");
-                    handled = true;
-                }
-                return handled;
+                sendMessage(messageField.getText().toString());
+                messageField.setText("");
+                handled = true;
             }
+            return handled;
         });
 
-        btnUpload.setOnClickListener(new View.OnClickListener()
+        btnUpload.setOnClickListener(view ->
         {
-            @Override
-            public void onClick(View view)
-            {
 
-            }
         });
     }
 

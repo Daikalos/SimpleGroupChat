@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
     private GoogleMap map;
 
     private Button btnGroups;
+    private Button btnLanguage;
+
+    private boolean languageSet = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
@@ -35,6 +39,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
         return view;
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration config)
+    {
+        super.onConfigurationChanged(config);
+
+
+    }
+
     private void initializeComponents(View view, Bundle savedInstance)
     {
         mapView = view.findViewById(R.id.mapView);
@@ -42,19 +54,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback
         mapView.getMapAsync(this);
 
         btnGroups = view.findViewById(R.id.btnGroups);
+        btnLanguage = view.findViewById(R.id.btnLanguage);
     }
     private void registerListeners()
     {
-        btnGroups.setOnClickListener(new View.OnClickListener()
+        btnGroups.setOnClickListener(view ->
         {
-            @Override
-            public void onClick(View view)
-            {
-                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.replace(R.id.fcvMain, new GroupListFragment());
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.fcvMain, new GroupListFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        btnLanguage.setOnClickListener(view ->
+        {
+            if (languageSet = !languageSet)
+                LocaleHelper.setLocale(requireContext(), "sv");
+            else
+                LocaleHelper.setLocale(requireContext(), "en");
+
+            btnGroups.setText(getResources().getString(R.string.btn_groups));
+            btnLanguage.setText(getResources().getString(R.string.btn_language));
         });
     }
 

@@ -5,15 +5,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class GroupFragment extends Fragment
 {
-    private Button btnBack;
+    private ImageButton btnBack;
     private Button btnChat;
+
     private RecyclerView rvUsers;
 
     @Override
@@ -31,22 +35,21 @@ public class GroupFragment extends Fragment
     {
         btnBack = view.findViewById(R.id.btnBack);
         btnChat = view.findViewById(R.id.btnChat);
+
         rvUsers = view.findViewById(R.id.rvUsers);
+        rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvUsers.setAdapter(new GroupAdapter(getContext(), new ViewModelProvider(requireActivity()).get(MainViewModel.class)));
     }
 
     private void registerListeners()
     {
-        btnBack.setOnClickListener(new View.OnClickListener()
+        btnBack.setOnClickListener(view ->
         {
-            @Override
-            public void onClick(View view)
-            {
-                getParentFragmentManager().popBackStack();
+            getParentFragmentManager().popBackStack();
 
-                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.replace(R.id.fcvMain, new GroupListFragment());
-                transaction.commit();
-            }
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.fcvMain, new GroupListFragment());
+            transaction.commit();
         });
     }
 }
