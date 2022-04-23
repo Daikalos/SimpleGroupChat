@@ -30,7 +30,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        controller = new Controller(this, new ViewModelProvider(this).get(MainViewModel.class), savedInstanceState);
+        MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        controller = new Controller(this, viewModel, savedInstanceState);
     }
 
     @Override

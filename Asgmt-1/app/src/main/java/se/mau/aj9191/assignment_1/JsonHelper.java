@@ -2,6 +2,7 @@ package se.mau.aj9191.assignment_1;
 
 import android.util.JsonWriter;
 import android.util.Log;
+import android.util.Pair;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,6 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class JsonHelper
 {
@@ -78,12 +80,12 @@ public class JsonHelper
     public static void parseMembers(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("members");
-        ArrayList<String> result = new ArrayList<>(arr.length());
+        String[] result = new String[arr.length()];
 
         for (int i = 0; i < arr.length(); ++i)
         {
             JSONObject obj = (JSONObject)arr.get(i);
-            result.add(obj.getString("member"));
+            result[i] = obj.getString("member");
         }
 
         viewModel.showMembers(result);
@@ -91,12 +93,12 @@ public class JsonHelper
     public static void parseGroups(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("groups");
-        ArrayList<String> result = new ArrayList<>(arr.length());
+        String[] result = new String[arr.length()];
 
         for (int i = 0; i < arr.length(); ++i)
         {
             JSONObject obj = (JSONObject)arr.get(i);
-            result.add(obj.getString("group"));
+            result[i] = obj.getString("group");
         }
 
         viewModel.showGroups(result);
@@ -112,9 +114,9 @@ public class JsonHelper
     public static void parseLocations(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("location");
-        ArrayList<String> result = new ArrayList<>(arr.length());
-
         String group = jsonObject.getString("group");
+
+        Pair<String, Location[]> result = new Pair<>(group, new Location[arr.length()]);
 
         for (int i = 0; i < arr.length(); ++i)
         {
@@ -122,10 +124,10 @@ public class JsonHelper
             double longitude = jsonObject.getDouble("longitude");
             double latitude = jsonObject.getDouble("latitude");
 
-
+            result.second[i] = new Location(member, new Coordinate(longitude, latitude));
         }
 
-
+        viewModel.updateLocations(result);
     }
     public static void parseEnterText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {

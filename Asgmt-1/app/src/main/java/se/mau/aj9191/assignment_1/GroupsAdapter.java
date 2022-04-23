@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
 {
@@ -20,7 +21,7 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
     {
         viewModel.getGroupsLiveData().observe(lifecycleOwner, groups ->
         {
-            this.groups = groups;
+            this.groups = new ArrayList<>(Arrays.asList(groups));
             notifyDataSetChanged();
 
             viewModel.getGroupsLiveData().removeObservers(lifecycleOwner);

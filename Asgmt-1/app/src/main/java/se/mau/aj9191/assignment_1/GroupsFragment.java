@@ -1,7 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,10 +29,12 @@ public class GroupsFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
     {
-        View view = inflater.inflate(R.layout.fragment_group_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_groups, container, false);
 
         initializeComponents(view);
         registerListeners();
+
+        Controller.sendMessage(JsonHelper.sendGetGroups());
 
         return view;
     }
@@ -44,17 +45,10 @@ public class GroupsFragment extends Fragment
 
         btnBack = view.findViewById(R.id.btnBack);
         btnNew = view.findViewById(R.id.btnNew);
+        rvGroups = view.findViewById(R.id.rvGroups);
 
-        final RecyclerView rvGroups = view.findViewById(R.id.rvGroups);
         rvGroups.setLayoutManager(new LinearLayoutManager(getContext()));
         rvGroups.setAdapter(new GroupsAdapter(viewModel, getViewLifecycleOwner()));
-
-        Controller.sendMessage(JsonHelper.sendGetGroups());
-
-        viewModel.getRegisterLiveData().observe(getViewLifecycleOwner(), s ->
-        {
-            rvGroups.getAdapter().notifyDataSetChanged();
-        });
     }
 
     private void registerListeners()
@@ -110,6 +104,11 @@ public class GroupsFragment extends Fragment
             dialog.setView(layout);
 
             dialog.show();
+        });
+
+        viewModel.getRegisterLiveData().observe(getViewLifecycleOwner(), s ->
+        {
+            rvGroups.getAdapter().notifyDataSetChanged();
         });
     }
 }

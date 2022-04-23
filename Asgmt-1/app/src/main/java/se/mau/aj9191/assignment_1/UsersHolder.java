@@ -1,20 +1,23 @@
 package se.mau.aj9191.assignment_1;
 
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class UsersHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+public class UsersHolder extends RecyclerView.ViewHolder
 {
+    private final TextView tvUsername;
+
     public UsersHolder(@NonNull View itemView)
     {
         super(itemView);
+        tvUsername = itemView.findViewById(R.id.tvUsername);
     }
 
-    @Override
-    public void onClick(View view)
+    public TextView getUsernameView()
     {
-
+        return tvUsername;
     }
 }
