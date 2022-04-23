@@ -6,23 +6,35 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
 {
-    private final MainViewModel viewModel;
-
     private ArrayList<String> groups = new ArrayList<>();
 
     public GroupsAdapter(MainViewModel viewModel, LifecycleOwner lifecycleOwner)
     {
-        this.viewModel = viewModel;
-
         viewModel.getGroupsLiveData().observe(lifecycleOwner, groups ->
         {
             this.groups = groups;
+            notifyDataSetChanged();
+
+            viewModel.getGroupsLiveData().removeObservers(lifecycleOwner);
+        });
+
+        viewModel.getRegisterLiveData().observe(lifecycleOwner, name ->
+        {
+            for (String groupName : groups)
+            {
+                if (name.equals(groupName))
+                    return;
+            }
+
+            groups.add(name);
             notifyDataSetChanged();
         });
     }

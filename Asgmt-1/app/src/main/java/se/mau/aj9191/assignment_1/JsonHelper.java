@@ -81,7 +81,10 @@ public class JsonHelper
         ArrayList<String> result = new ArrayList<>(arr.length());
 
         for (int i = 0; i < arr.length(); ++i)
-            result.add(arr.getString(i));
+        {
+            JSONObject obj = (JSONObject)arr.get(i);
+            result.add(obj.getString("member"));
+        }
 
         viewModel.showMembers(result);
     }
@@ -91,7 +94,10 @@ public class JsonHelper
         ArrayList<String> result = new ArrayList<>(arr.length());
 
         for (int i = 0; i < arr.length(); ++i)
-            result.add(arr.getString(i));
+        {
+            JSONObject obj = (JSONObject)arr.get(i);
+            result.add(obj.getString("group"));
+        }
 
         viewModel.showGroups(result);
     }
