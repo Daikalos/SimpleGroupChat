@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,7 +43,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private Button btnGroups;
     private Button btnLanguage;
-    private RecyclerView rvGroupsViewable;
+    private RecyclerView rvViewable;
 
     private boolean languageSet = false;
 
@@ -85,14 +86,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         btnGroups = view.findViewById(R.id.btnGroups);
         btnLanguage = view.findViewById(R.id.btnLanguage);
-        rvGroupsViewable = view.findViewById(R.id.rvViewableGroups);
+        rvViewable = view.findViewById(R.id.rvViewableGroups);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext());
         linearLayoutManager.setReverseLayout(true);
         linearLayoutManager.setStackFromEnd(true);
 
-        rvGroupsViewable.setAdapter(new ViewableAdapter(viewModel));
-        rvGroupsViewable.setLayoutManager(linearLayoutManager);
+        rvViewable.setAdapter(new ViewableAdapter(viewModel));
+        rvViewable.setLayoutManager(linearLayoutManager);
+        rvViewable.addItemDecoration(new DividerItemDecoration(rvViewable.getContext(), DividerItemDecoration.VERTICAL));
     }
     private void registerListeners()
     {
@@ -165,12 +167,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         for (Location loc : locations)
         {
             MarkerOptions markerOptions = new MarkerOptions();
-            Coordinates coordinates = loc.getCoordinates();
 
-            if (Double.isNaN(coordinates.longitude) || Double.isNaN(coordinates.latitude))
+            double longitude = loc.getLongitude();
+            double latitude = loc.getLatitude();
+
+            if (Double.isNaN(longitude) || Double.isNaN(latitude))
                 continue;
 
-            markerOptions.position(new LatLng(coordinates.longitude, coordinates.latitude));
+            markerOptions.position(new LatLng(longitude, latitude));
             markerOptions.title(loc.getMember());
             markerOptions.snippet(loc.getMember() + " last recorded location");
 

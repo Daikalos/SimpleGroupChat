@@ -3,20 +3,22 @@ package se.mau.aj9191.assignment_1;
 public class Location
 {
     private final String member;
-    private final Coordinates coordinates;
+    private final double longitude, latitude;
 
-    public Location(String member, Coordinates coordinates)
+    public Location(String member, double longitude, double latitude)
     {
         this.member = member;
-        this.coordinates = coordinates;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     public String getMember()
     {
         return member;
     }
-    public Coordinates getCoordinates()
+    public double getLongitude()
     {
-        return coordinates;
+        return longitude;
     }
+    public double getLatitude() { return latitude; }
 }

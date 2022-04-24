@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +34,7 @@ public class UsersFragment extends Fragment
     private RecyclerView rvUsers;
 
     private String groupName;
+    private Group group = null;
 
     public UsersFragment() { }
     public UsersFragment(String groupName)
@@ -50,6 +52,7 @@ public class UsersFragment extends Fragment
 
         initializeComponents(view);
         registerListeners();
+        addObservers();
 
         return view;
     }
@@ -58,7 +61,9 @@ public class UsersFragment extends Fragment
     public void onResume()
     {
         super.onResume();
+
         Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+        group = viewModel.joinedGroup(groupName);
     }
 
     @Override
@@ -78,20 +83,16 @@ public class UsersFragment extends Fragment
         btnAction = view.findViewById(R.id.btnAction);
         rvUsers = view.findViewById(R.id.rvUsers);
 
-        tvGroupName.setText(groupName);
-
-        if (viewModel.joinedGroup(groupName) != null)
-            btnAction.setText(R.string.btn_deregister);
-        else
-        {
-            btnChat.setEnabled(false);
-            btnChat.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey));
-
-            btnAction.setText(R.string.btn_register);
-        }
-
         rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
         rvUsers.setAdapter(new UsersAdapter(groupName, viewModel, getViewLifecycleOwner()));
+        rvUsers.addItemDecoration(new DividerItemDecoration(rvUsers.getContext(), DividerItemDecoration.VERTICAL));
+
+        tvGroupName.setText(groupName);
+
+        if (group != null)
+            enableControls();
+        else
+            disableControls();
     }
 
     private void registerListeners()
@@ -103,30 +104,41 @@ public class UsersFragment extends Fragment
 
         btnChat.setOnClickListener(view ->
         {
-            getParentFragmentManager().beginTransaction()
-                .replace(R.id.fcvMain, new ChatFragment())
-                .addToBackStack(null).commit();
+            if (group != null)
+            {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fcvMain, new ChatFragment(group))
+                        .addToBackStack(null).commit();
+            }
         });
 
         btnAction.setOnClickListener(view ->
         {
-            if (viewModel.joinedGroup(groupName) != null)
-            {
+            if (group != null)
                 leaveGroup(view);
-
-                btnChat.setEnabled(true);
-                btnChat.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-
-                btnAction.setText(R.string.btn_deregister);
-            }
             else
-            {
                 enterGroup(view);
+        });
+    }
 
-                btnChat.setEnabled(false);
-                btnChat.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey));
+    private void addObservers()
+    {
+        viewModel.getRegisterLiveData().observe(getViewLifecycleOwner(), group ->
+        {
+            if (groupName.equals(group.getName()))
+            {
+                this.group = group;
 
-                btnAction.setText(R.string.btn_register);
+                enableControls();
+                Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+            }
+        });
+        viewModel.getUnregisterLiveData().observe(getViewLifecycleOwner(), id ->
+        {
+            if (group != null && id.equals(group.getId()))
+            {
+                disableControls();
+                Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
             }
         });
     }
@@ -153,10 +165,6 @@ public class UsersFragment extends Fragment
             }
 
             Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
-
-            ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fcvMain, new UsersFragment(groupName))
-                .addToBackStack(null).commit();
         });
         builder.setNegativeButton("Cancel", null);
 
@@ -170,6 +178,21 @@ public class UsersFragment extends Fragment
     }
     private void leaveGroup(View view)
     {
-        Controller.sendMessage(JsonHelper.sendUnregister(viewModel.joinedGroup(groupName).getId()));
+        Controller.sendMessage(JsonHelper.sendUnregister(group.getId()));
+    }
+
+    private void disableControls()
+    {
+        btnChat.setEnabled(false);
+        btnChat.setTextColor(ContextCompat.getColor(requireContext(), R.color.grey));
+
+        btnAction.setText(R.string.btn_register);
+    }
+    private void enableControls()
+    {
+        btnChat.setEnabled(true);
+        btnChat.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+
+        btnAction.setText(R.string.btn_deregister);
     }
 }

@@ -9,25 +9,55 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class ChatAdapter extends RecyclerView.Adapter
 {
+    private ArrayList<TextMessage> messages = new ArrayList<>();
+
+    public ChatAdapter(MainViewModel viewModel)
+    {
+
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType)
     {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.group_row, viewGroup, false);
-        return new TextChatHolder(view);
+        if (viewType == TextMessage.TEXT_TYPE)
+        {
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.textchat_row, viewGroup, false);
+            return new TextChatHolder(view);
+        }
+        else if (viewType == TextMessage.IMAGE_TYPE)
+        {
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.imagechat_row, viewGroup, false);
+            return new ImageChatHolder(view);
+        }
+
+        return null;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
+        TextMessage message = messages.get(position);
 
+        if (holder.getItemViewType() == TextMessage.TEXT_TYPE)
+            ((TextChatHolder)holder).bind(message);
+        else if (holder.getItemViewType() == TextMessage.IMAGE_TYPE)
+            ((ImageChatHolder)holder).bind((ImageMessage)message);
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        return messages.get(position).getType();
     }
 
     @Override
     public int getItemCount()
     {
-        return 0;
+        return messages.size();
     }
 
     public static class TextChatHolder extends RecyclerView.ViewHolder
@@ -41,9 +71,9 @@ public class ChatAdapter extends RecyclerView.Adapter
             tvTextChat = itemView.findViewById(R.id.tvTextChat);
         }
 
-        public TextView getTextChatView()
+        public void bind(TextMessage textMessage)
         {
-            return tvTextChat;
+            tvTextChat.setText(String.format("%s: %s", textMessage.username, textMessage.message));
         }
     }
     public static class ImageChatHolder extends RecyclerView.ViewHolder implements View.OnClickListener
@@ -65,9 +95,9 @@ public class ChatAdapter extends RecyclerView.Adapter
 
         }
 
-        public TextView getGroupNameView()
+        public void bind(ImageMessage imageMessage)
         {
-            return tvGroupName;
+
         }
     }
 }

@@ -35,25 +35,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/desc_uploadedImage"
             app:srcCompat="@android:drawable/ic_delete" />
 
-        <TextView
-            android:id="@+id/tvTextChat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:hint="@string/placeholder_textchat"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:shadowColor="@color/black"
-            android:shadowDx="1.5"
-            android:shadowDy="1.5"
-            android:shadowRadius="1.6"
-            android:textAlignment="textStart"
-            android:textColor="@color/dark_blue"
-            android:textColorHint="@color/dark_blue"
-            android:textSize="20sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -14,4 +14,6 @@
     <string name="btn_chat">CHATTA</string>
     <string name="placeholder_groupcount">0/20</string>
     <string name="btn_language">ENGELSKA</string>
+    <string name="placeholder_textchat">meddelande</string>
+    <string name="desc_uploadedImage">bild laddad upp av en användare</string>
 </resources>

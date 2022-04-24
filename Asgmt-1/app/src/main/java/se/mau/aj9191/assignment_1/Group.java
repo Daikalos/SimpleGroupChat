@@ -1,8 +1,8 @@
 package se.mau.aj9191.assignment_1;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Group
+public class Group implements Serializable
 {
     private final String id, name;
     public boolean viewable = true;

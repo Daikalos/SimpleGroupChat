@@ -66,22 +66,24 @@ public class JsonHelper
 
     public static void parseRegister(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
-        String group = jsonObject.getString("group");
         String id = jsonObject.getString("id");
+        String groupName = jsonObject.getString("group");
 
-        viewModel.register(id, group);
+        Group group = new Group(id, groupName);
+
+        viewModel.postRegister(group);
     }
     public static void parseUnregister(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String id = jsonObject.getString("id");
-        viewModel.unregister(id);
+        viewModel.postUnregister(id);
     }
     public static void parseMembers(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("members");
-        String group = jsonObject.getString("group");
+        String groupName = jsonObject.getString("group");
 
-        Pair<String, String[]> result = new Pair<>(group, new String[arr.length()]);
+        Pair<String, String[]> result = new Pair<>(groupName, new String[arr.length()]);
 
         for (int i = 0; i < arr.length(); ++i)
         {
@@ -89,7 +91,7 @@ public class JsonHelper
             result.second[i] = obj.getString("member");
         }
 
-        viewModel.showMembers(result);
+        viewModel.postMembers(result);
     }
     public static void parseGroups(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -102,7 +104,7 @@ public class JsonHelper
             result[i] = obj.getString("group");
         }
 
-        viewModel.showGroups(result);
+        viewModel.postGroups(result);
     }
     public static void parseSetLocation(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -110,13 +112,16 @@ public class JsonHelper
         double longitude = Double.parseDouble(jsonObject.getString("longitude"));
         double latitude = Double.parseDouble(jsonObject.getString("latitude"));
 
+        Location location = new Location(id, longitude, latitude);
+
+        viewModel.postLocation(location);
     }
     public static void parseLocations(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("location");
-        String group = jsonObject.getString("group");
+        String groupName = jsonObject.getString("group");
 
-        Pair<String, Location[]> result = new Pair<>(group, new Location[arr.length()]);
+        Pair<String, Location[]> result = new Pair<>(groupName, new Location[arr.length()]);
 
         for (int i = 0; i < arr.length(); ++i)
         {
@@ -126,24 +131,28 @@ public class JsonHelper
             double longitude = Double.parseDouble(obj.getString("longitude"));
             double latitude = Double.parseDouble(obj.getString("latitude"));
 
-            result.second[i] = new Location(member, new Coordinates(longitude, latitude));
+            result.second[i] = new Location(member, longitude, latitude);
         }
 
-        viewModel.updateLocations(result);
+        viewModel.postLocations(result);
     }
     public static void parseEnterText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String id = jsonObject.getString("id");
         String text = jsonObject.getString("text");
 
+        SentText sentText = new SentText(id, text);
 
+        viewModel.postSentText(sentText);
     }
     public static void parseEnterImage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String imageid = jsonObject.getString("imageid");
         String port = jsonObject.getString("port");
 
+        SentImage sentImage = new SentImage(imageid, port);
 
+        viewModel.postSentImage(sentImage);
     }
     public static void parseReceiveText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -151,7 +160,9 @@ public class JsonHelper
         String member = jsonObject.getString("member");
         String text = jsonObject.getString("text");
 
+        TextMessage result = new TextMessage(group, member, text);
 
+        viewModel.postTextMessage(result);
     }
     public static void parseReceiveImage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -163,7 +174,9 @@ public class JsonHelper
         String imageid = jsonObject.getString("imageid");
         String port = jsonObject.getString("port");
 
+        ImageMessage result = new ImageMessage(group, member, text, longitude, latitude, imageid, port);
 
+        viewModel.postTextMessage(result);
     }
     public static void parseException(JSONObject jsonObject) throws JSONException
     {
