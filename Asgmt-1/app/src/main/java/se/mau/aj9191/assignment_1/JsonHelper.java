@@ -141,18 +141,18 @@ public class JsonHelper
         String id = jsonObject.getString("id");
         String text = jsonObject.getString("text");
 
-        SentText sentText = new SentText(id, text);
+        SendText sendText = new SendText(id, text);
 
-        viewModel.postSentText(sentText);
+        viewModel.postSentText(sendText);
     }
     public static void parseEnterImage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String imageid = jsonObject.getString("imageid");
         String port = jsonObject.getString("port");
 
-        SentImage sentImage = new SentImage(imageid, port);
+        SendImage sendImage = new SendImage(imageid, port);
 
-        viewModel.postSentImage(sentImage);
+        viewModel.postSentImage(sendImage);
     }
     public static void parseReceiveText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {

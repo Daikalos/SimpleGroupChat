@@ -1,23 +1,23 @@
 package se.mau.aj9191.assignment_1;
 
-class SentText
+class SendText
 {
     public String id;
     public String message;
 
-    public SentText(String id, String message)
+    public SendText(String id, String message)
     {
         this.id = id;
         this.message = message;
     }
 }
 
-class SentImage
+class SendImage
 {
     public String imageid;
     public String port;
 
-    public SentImage(String imageid, String port)
+    public SendImage(String imageid, String port)
     {
         this.imageid = imageid;
         this.port = port;

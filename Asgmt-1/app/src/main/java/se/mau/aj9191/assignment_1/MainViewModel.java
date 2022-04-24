@@ -1,17 +1,12 @@
 package se.mau.aj9191.assignment_1;
 
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.function.Predicate;
 
 public class MainViewModel extends ViewModel
 {
@@ -26,8 +21,8 @@ public class MainViewModel extends ViewModel
 
     private final MutableLiveData<Group> viewable = new MutableLiveData<>();
 
-    private final MutableLiveData<SentText> sentText = new MutableLiveData<>();
-    private final MutableLiveData<SentImage> sentImage = new MutableLiveData<>();
+    private final MutableLiveData<SendText> sentText = new MutableLiveData<>();
+    private final MutableLiveData<SendImage> sentImage = new MutableLiveData<>();
 
     private final MutableLiveData<TextMessage> textMessage = new MutableLiveData<>();
     private final MutableLiveData<ImageMessage> imageMessage = new MutableLiveData<>();
@@ -84,13 +79,13 @@ public class MainViewModel extends ViewModel
         viewable.postValue(group);
     }
 
-    public void postSentText(SentText sentText)
+    public void postSentText(SendText sendText)
     {
-        this.sentText.postValue(sentText);
+        this.sentText.postValue(sendText);
     }
-    public void postSentImage(SentImage sentImage)
+    public void postSentImage(SendImage sendImage)
     {
-        this.sentImage.postValue(sentImage);
+        this.sentImage.postValue(sendImage);
     }
 
     public void postTextMessage(TextMessage textMessage)
@@ -134,11 +129,11 @@ public class MainViewModel extends ViewModel
         return viewable;
     }
 
-    public LiveData<SentText> getSentTextLiveData()
+    public LiveData<SendText> getSentTextLiveData()
     {
         return sentText;
     }
-    public LiveData<SentImage> getSentImage()
+    public LiveData<SendImage> getSentImage()
     {
         return sentImage;
     }
