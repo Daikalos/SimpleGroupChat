@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ public class UsersFragment extends Fragment
 {
     private MainViewModel viewModel;
 
+    private TextView tvGroupName;
     private ImageButton btnBack;
     private Button btnChat;
     private Button btnAction;
@@ -51,21 +53,24 @@ public class UsersFragment extends Fragment
     {
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
+        tvGroupName = view.findViewById(R.id.tvGroupName);
         btnBack = view.findViewById(R.id.btnBack);
         btnChat = view.findViewById(R.id.btnChat);
         btnAction = view.findViewById(R.id.btnAction);
         rvUsers = view.findViewById(R.id.rvUsers);
 
-        if (viewModel.enteredGroup(groupName))
-            btnAction.setText(R.string.btn_register);
+        tvGroupName.setText(groupName);
+
+        if (viewModel.joinedGroup(groupName) != null)
+            btnAction.setText(R.string.btn_deregister);
         else
         {
             btnChat.setEnabled(false);
-            btnAction.setText(R.string.btn_deregister);
+            btnAction.setText(R.string.btn_register);
         }
 
         rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvUsers.setAdapter(new UsersAdapter(new ViewModelProvider(requireActivity()).get(MainViewModel.class), this));
+        rvUsers.setAdapter(new UsersAdapter(groupName, new ViewModelProvider(requireActivity()).get(MainViewModel.class), this));
     }
 
     private void registerListeners()
@@ -73,24 +78,19 @@ public class UsersFragment extends Fragment
         btnBack.setOnClickListener(view ->
         {
             getParentFragmentManager().popBackStack();
-
-            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fcvMain, new GroupsFragment());
-            transaction.commit();
         });
 
         btnChat.setOnClickListener(view ->
         {
-            getParentFragmentManager().popBackStack();
-
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             transaction.replace(R.id.fcvMain, new ChatFragment());
+            transaction.addToBackStack(null);
             transaction.commit();
         });
 
         btnAction.setOnClickListener(view ->
         {
-            if (viewModel.enteredGroup(groupName))
+            if (viewModel.joinedGroup(groupName) != null)
             {
                 enterGroup(view);
 

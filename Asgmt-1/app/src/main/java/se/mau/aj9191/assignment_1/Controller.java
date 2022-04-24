@@ -9,8 +9,8 @@ import android.os.IBinder;
 
 public class Controller
 {
-    private MainActivity mainActivity;
-    private MainViewModel viewModel;
+    private final MainActivity mainActivity;
+    private final MainViewModel viewModel;
 
     private static NetworkService networkService;
     private boolean bound = false;

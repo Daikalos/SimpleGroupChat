@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class LocaleHelper
 {
-    private static final String SELECTED_LANGUAGE = "Locale.Helper.Selected.Language";
+    public static final String SELECTED_LANGUAGE = "Locale.Helper.Selected.Language";
 
     private static void persist(Context context, String language)
     {

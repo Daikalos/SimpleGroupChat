@@ -10,6 +10,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Predicate;
 
 public class MainViewModel extends ViewModel
 {
@@ -17,24 +18,25 @@ public class MainViewModel extends ViewModel
     private final MutableLiveData<String> unregister = new MutableLiveData<>();
 
     private final MutableLiveData<String[]> groups = new MutableLiveData<>();
-    private final MutableLiveData<String[]> members = new MutableLiveData<>();
+    private final MutableLiveData<Pair<String, String[]>> members = new MutableLiveData<>(); // group, members
 
     private final MutableLiveData<Pair<String, Location[]>> locations = new MutableLiveData<>(); // group, locations
+    private final MutableLiveData<Group> viewable = new MutableLiveData<>();
 
-    private final HashMap<String, String> enteredGroups = new HashMap<>(); // id, group name
+    private final ArrayList<Group> joinedGroups = new ArrayList<>();
 
     public void register(String groupName, String id)
     {
-        enteredGroups.put(id, groupName);
+        joinedGroups.add(new Group(id, groupName));
         register.postValue(groupName);
     }
     public void unregister(String id)
     {
-        enteredGroups.remove(id);
+        joinedGroups.removeIf(group -> group.getId().equals(id));
         unregister.postValue(id);
     }
 
-    public void showMembers(String[] members)
+    public void showMembers(Pair<String, String[]> members)
     {
         this.members.postValue(members);
     }
@@ -42,18 +44,29 @@ public class MainViewModel extends ViewModel
     {
         this.groups.postValue(groups);
     }
-    public void setLocation(String id, double longitude, double latitude)
-    {
-
-    }
     public void updateLocations(Pair<String, Location[]> locations)
     {
         this.locations.postValue(locations);
     }
-
-    public boolean enteredGroup(String groupName)
+    public void updateViewable(Group group)
     {
-        return enteredGroups.containsValue(groupName);
+        viewable.postValue(group);
+    }
+
+    public int getGroupsSize()
+    {
+        return joinedGroups.size();
+    }
+    public Group getGroup(int index)
+    {
+        return joinedGroups.get(index);
+    }
+    public Group joinedGroup(String groupName)
+    {
+        if (groupName == null || groupName.isEmpty())
+            return null;
+
+        return joinedGroups.stream().filter(o -> groupName.equals(o.getName())).findFirst().orElse(null);
     }
 
     public LiveData<String> getRegisterLiveData()
@@ -69,7 +82,7 @@ public class MainViewModel extends ViewModel
     {
         return groups;
     }
-    public LiveData<String[]> getMembersLiveData()
+    public LiveData<Pair<String, String[]>> getMembersLiveData()
     {
         return members;
     }
@@ -77,5 +90,9 @@ public class MainViewModel extends ViewModel
     public LiveData<Pair<String, Location[]>> getLocationsLiveData()
     {
         return locations;
+    }
+    public LiveData<Group> getViewableLiveData()
+    {
+        return viewable;
     }
 }

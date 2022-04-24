@@ -15,7 +15,7 @@ public class Location
     {
         return member;
     }
-    public Coordinate getLongitude()
+    public Coordinate getCoordinates()
     {
         return coordinates;
     }

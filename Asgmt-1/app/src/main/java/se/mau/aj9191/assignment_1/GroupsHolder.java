@@ -15,7 +15,10 @@ public class GroupsHolder extends RecyclerView.ViewHolder implements View.OnClic
     public GroupsHolder(@NonNull View itemView)
     {
         super(itemView);
+
         tvGroupName = itemView.findViewById(R.id.tvGroupName);
+
+        itemView.setOnClickListener(this);
     }
 
     @Override

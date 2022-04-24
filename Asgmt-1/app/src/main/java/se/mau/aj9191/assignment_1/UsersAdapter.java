@@ -16,11 +16,17 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersHolder>
 {
     private ArrayList<String> users = new ArrayList<>();
 
-    public UsersAdapter(MainViewModel viewModel, LifecycleOwner lifecycleOwner)
+    public UsersAdapter(String groupName, MainViewModel viewModel, LifecycleOwner lifecycleOwner)
     {
         viewModel.getMembersLiveData().observe(lifecycleOwner, members ->
         {
-            users = new ArrayList<>(Arrays.asList(members));
+            if (!members.first.equals(groupName))
+                return;
+
+            users = new ArrayList<>(Arrays.asList(members.second));
+            notifyDataSetChanged();
+
+            viewModel.getMembersLiveData().removeObservers(lifecycleOwner);
         });
     }
 

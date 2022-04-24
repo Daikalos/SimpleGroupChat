@@ -56,10 +56,6 @@ public class GroupsFragment extends Fragment
         btnBack.setOnClickListener(view ->
         {
             getParentFragmentManager().popBackStack();
-
-            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fcvMain, new MapsFragment());
-            transaction.commit();
         });
 
         btnNew.setOnClickListener(view ->

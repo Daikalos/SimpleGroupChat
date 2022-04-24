@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -32,6 +33,9 @@ public class MainActivity extends AppCompatActivity
 
         MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         controller = new Controller(this, viewModel, savedInstanceState);
+
+        String currentLanguage = PreferenceManager.getDefaultSharedPreferences(this).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
+        LocaleHelper.setLocale(this, currentLanguage);
     }
 
     @Override
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     {
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 1);
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(new String[] { Manifest.permission.ACCESS_COARSE_LOCATION }, 2);
     }
 
     @Override
@@ -60,11 +66,9 @@ public class MainActivity extends AppCompatActivity
 
         switch (requestCode)
         {
-            case 1:
+            case 1: case 2:
                 if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
-                {
                     ActivityCompat.finishAffinity(this);
-                }
                 break;
         }
     }

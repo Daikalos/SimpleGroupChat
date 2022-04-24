@@ -13,6 +13,7 @@ public class UsersHolder extends RecyclerView.ViewHolder
     public UsersHolder(@NonNull View itemView)
     {
         super(itemView);
+
         tvUsername = itemView.findViewById(R.id.tvUsername);
     }
 

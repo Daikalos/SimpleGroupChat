@@ -61,7 +61,8 @@ public class JsonHelper
         }
         catch (JSONException e)
         {
-            Log.d("error", e.getMessage());
+            e.printStackTrace();
+            Log.d("error", e.getMessage() + "\n");
         }
     }
 
@@ -80,12 +81,14 @@ public class JsonHelper
     public static void parseMembers(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("members");
-        String[] result = new String[arr.length()];
+        String group = jsonObject.getString("group");
+
+        Pair<String, String[]> result = new Pair<>(group, new String[arr.length()]);
 
         for (int i = 0; i < arr.length(); ++i)
         {
             JSONObject obj = (JSONObject)arr.get(i);
-            result[i] = obj.getString("member");
+            result.second[i] = obj.getString("member");
         }
 
         viewModel.showMembers(result);
@@ -185,6 +188,7 @@ public class JsonHelper
         {
             exception.printStackTrace();
         }
+
         return stringWriter.toString();
     }
     public static String sendUnregister(String id)
@@ -240,7 +244,7 @@ public class JsonHelper
 
         return stringWriter.toString();
     }
-    public static String sendSetLocation(String id, double longitude, double latitude)
+    public static String sendLocation(String id, double longitude, double latitude)
     {
         StringWriter stringWriter = new StringWriter();
         JsonWriter writer = new JsonWriter(stringWriter);
