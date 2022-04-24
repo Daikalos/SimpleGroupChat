@@ -13,9 +13,13 @@
         android:paddingTop="2dp"
         android:paddingRight="4dp"
         android:paddingBottom="2dp"
+        android:shadowColor="@color/black"
+        android:shadowDx="1.5"
+        android:shadowDy="1.5"
+        android:shadowRadius="1.6"
         android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
+        android:textColor="@color/dark_blue"
+        android:textColorHint="@color/dark_blue"
         android:textSize="24sp"
         android:textStyle="bold" />
 

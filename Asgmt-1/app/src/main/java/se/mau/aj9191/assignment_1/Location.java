@@ -3,9 +3,9 @@ package se.mau.aj9191.assignment_1;
 public class Location
 {
     private final String member;
-    private final Coordinate coordinates;
+    private final Coordinates coordinates;
 
-    public Location(String member, Coordinate coordinates)
+    public Location(String member, Coordinates coordinates)
     {
         this.member = member;
         this.coordinates = coordinates;
@@ -15,7 +15,7 @@ public class Location
     {
         return member;
     }
-    public Coordinate getCoordinates()
+    public Coordinates getCoordinates()
     {
         return coordinates;
     }

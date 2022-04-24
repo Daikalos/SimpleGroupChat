@@ -12,12 +12,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class ChatFragment extends Fragment
 {
-    private EditText messageField;
+    private EditText etMessage;
     private ImageButton btnUpload;
     private ImageButton btnBack;
+    private RecyclerView rvChat;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -32,20 +34,21 @@ public class ChatFragment extends Fragment
 
     private void initializeComponents(View view)
     {
-        messageField = view.findViewById(R.id.etMessage);
+        etMessage = view.findViewById(R.id.etMessage);
         btnUpload = view.findViewById(R.id.btnUpload);
         btnBack = view.findViewById(R.id.btnBack);
+        rvChat = view.findViewById(R.id.rvChat);
     }
 
     private void registerListeners()
     {
-        messageField.setOnEditorActionListener((textView, i, keyEvent) ->
+        etMessage.setOnEditorActionListener((textView, i, keyEvent) ->
         {
             boolean handled = false;
             if (i == EditorInfo.IME_ACTION_SEND)
             {
-                sendMessage(messageField.getText().toString());
-                messageField.setText("");
+                sendMessage(etMessage.getText().toString());
+                etMessage.setText("");
                 handled = true;
             }
             return handled;

@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/tvUsername"
+        android:id="@+id/tvTextChat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -13,8 +13,12 @@
         android:paddingTop="2dp"
         android:paddingRight="4dp"
         android:paddingBottom="2dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
+        android:shadowColor="@color/black"
+        android:shadowDx="1.5"
+        android:shadowDy="1.5"
+        android:shadowRadius="1.6"
+        android:textColor="@color/dark_blue"
+        android:textColorHint="@color/dark_blue"
         android:textSize="24sp"
         android:textStyle="bold" />
 </LinearLayout>

@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -36,22 +35,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersHolder>
         return new UsersHolder(view);
     }
 
-    public static class UsersHolder extends RecyclerView.ViewHolder
-    {
-        private final TextView tvUsername;
-
-        public UsersHolder(@NonNull View itemView)
-        {
-            super(itemView);
-            tvUsername = itemView.findViewById(R.id.tvUsername);
-        }
-
-        public TextView getUsernameView()
-        {
-            return tvUsername;
-        }
-    }
-
     @Override
     public void onBindViewHolder(@NonNull UsersHolder holder, int position)
     {
@@ -62,5 +45,22 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersHolder>
     public int getItemCount()
     {
         return users.size();
+    }
+
+
+    public static class UsersHolder extends RecyclerView.ViewHolder
+    {
+        private final TextView tvUsername;
+
+        public UsersHolder(@NonNull View itemView)
+        {
+            super(itemView);
+            tvUsername = itemView.findViewById(R.id.tvTextChat);
+        }
+
+        public TextView getUsernameView()
+        {
+            return tvUsername;
+        }
     }
 }

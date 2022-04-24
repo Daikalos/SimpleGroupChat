@@ -10,8 +10,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class JsonHelper
 {
@@ -128,7 +126,7 @@ public class JsonHelper
             double longitude = Double.parseDouble(obj.getString("longitude"));
             double latitude = Double.parseDouble(obj.getString("latitude"));
 
-            result.second[i] = new Location(member, new Coordinate(longitude, latitude));
+            result.second[i] = new Location(member, new Coordinates(longitude, latitude));
         }
 
         viewModel.updateLocations(result);

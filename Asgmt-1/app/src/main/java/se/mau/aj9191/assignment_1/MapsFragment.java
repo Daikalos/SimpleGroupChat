@@ -7,7 +7,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener {
     private static int UPDATE_INTERVAL = 30000;
@@ -167,7 +165,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         for (Location loc : locations)
         {
             MarkerOptions markerOptions = new MarkerOptions();
-            Coordinate coordinates = loc.getCoordinates();
+            Coordinates coordinates = loc.getCoordinates();
 
             if (Double.isNaN(coordinates.longitude) || Double.isNaN(coordinates.latitude))
                 continue;
