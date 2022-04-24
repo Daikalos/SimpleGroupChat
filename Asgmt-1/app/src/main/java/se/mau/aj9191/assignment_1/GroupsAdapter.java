@@ -3,8 +3,10 @@ package se.mau.aj9191.assignment_1;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,7 +15,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
+public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupsHolder>
 {
     private ArrayList<String> groups = new ArrayList<>();
 
@@ -22,20 +24,6 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
         viewModel.getGroupsLiveData().observe(lifecycleOwner, groups ->
         {
             this.groups = new ArrayList<>(Arrays.asList(groups));
-            notifyDataSetChanged();
-
-            viewModel.getGroupsLiveData().removeObservers(lifecycleOwner);
-        });
-
-        viewModel.getRegisterLiveData().observe(lifecycleOwner, name ->
-        {
-            for (String groupName : groups)
-            {
-                if (name.equals(groupName))
-                    return;
-            }
-
-            groups.add(name);
             notifyDataSetChanged();
         });
     }
@@ -58,5 +46,32 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsHolder>
     public int getItemCount()
     {
         return groups.size();
+    }
+
+    public static class GroupsHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    {
+        private final TextView tvGroupName;
+
+        public GroupsHolder(@NonNull View itemView)
+        {
+            super(itemView);
+
+            tvGroupName = itemView.findViewById(R.id.tvGroupName);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view)
+        {
+            ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fcvMain, new UsersFragment(tvGroupName.getText().toString()))
+                    .addToBackStack(null).commit();
+        }
+
+        public TextView getGroupNameView()
+        {
+            return tvGroupName;
+        }
     }
 }

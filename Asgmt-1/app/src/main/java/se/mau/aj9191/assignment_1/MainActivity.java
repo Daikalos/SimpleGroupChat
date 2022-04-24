@@ -25,6 +25,11 @@ public class MainActivity extends AppCompatActivity
 {
     private Controller controller;
 
+    public MainActivity()
+    {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -39,38 +44,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume()
-    {
-        super.onResume();
-        checkPermissions();
-    }
-    @Override
     protected void onDestroy()
     {
         super.onDestroy();
         controller.onDestroy();
-    }
-
-    private void checkPermissions()
-    {
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 1);
-        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[] { Manifest.permission.ACCESS_COARSE_LOCATION }, 2);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode)
-        {
-            case 1: case 2:
-                if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_DENIED)
-                    ActivityCompat.finishAffinity(this);
-                break;
-        }
     }
 
     @Override

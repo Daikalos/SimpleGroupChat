@@ -2,6 +2,7 @@ package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,16 +29,21 @@ public class GroupsFragment extends Fragment
     private RecyclerView rvGroups;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_groups, container, false);
 
         initializeComponents(view);
         registerListeners();
 
-        Controller.sendMessage(JsonHelper.sendGetGroups());
-
         return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();;
+        Controller.sendMessage(JsonHelper.sendGetGroups());
     }
 
     private void initializeComponents(View view)
@@ -85,10 +92,9 @@ public class GroupsFragment extends Fragment
 
                 Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
 
-                FragmentTransaction transaction = ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fcvMain, new UsersFragment(groupName));
-                transaction.addToBackStack(null);
-                transaction.commit();
+                ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fcvMain, new UsersFragment(groupName))
+                        .addToBackStack(null).commit();
             });
             builder.setNegativeButton("Cancel", null);
 

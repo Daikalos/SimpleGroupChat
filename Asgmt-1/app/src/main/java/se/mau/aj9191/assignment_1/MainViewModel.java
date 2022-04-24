@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
 
 public class MainViewModel extends ViewModel
 {
-    private final MutableLiveData<String> register = new MutableLiveData<>();
+    private final MutableLiveData<Pair<String, String>> register = new MutableLiveData<>();
     private final MutableLiveData<String> unregister = new MutableLiveData<>();
 
     private final MutableLiveData<String[]> groups = new MutableLiveData<>();
@@ -25,10 +26,10 @@ public class MainViewModel extends ViewModel
 
     private final ArrayList<Group> joinedGroups = new ArrayList<>();
 
-    public void register(String groupName, String id)
+    public void register(String id, String groupName)
     {
         joinedGroups.add(new Group(id, groupName));
-        register.postValue(groupName);
+        register.postValue(new Pair<>(id, groupName));
     }
     public void unregister(String id)
     {
@@ -69,7 +70,7 @@ public class MainViewModel extends ViewModel
         return joinedGroups.stream().filter(o -> groupName.equals(o.getName())).findFirst().orElse(null);
     }
 
-    public LiveData<String> getRegisterLiveData()
+    public LiveData<Pair<String, String>> getRegisterLiveData()
     {
         return register;
     }

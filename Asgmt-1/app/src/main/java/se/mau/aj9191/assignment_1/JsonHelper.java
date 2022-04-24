@@ -71,7 +71,7 @@ public class JsonHelper
         String group = jsonObject.getString("group");
         String id = jsonObject.getString("id");
 
-        viewModel.register(group, id);
+        viewModel.register(id, group);
     }
     public static void parseUnregister(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
@@ -109,9 +109,8 @@ public class JsonHelper
     public static void parseSetLocation(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String id = jsonObject.getString("id");
-        double longitude = jsonObject.getDouble("longitude");
-        double latitude = jsonObject.getDouble("latitude");
-
+        double longitude = Double.parseDouble(jsonObject.getString("longitude"));
+        double latitude = Double.parseDouble(jsonObject.getString("latitude"));
 
     }
     public static void parseLocations(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
@@ -123,9 +122,11 @@ public class JsonHelper
 
         for (int i = 0; i < arr.length(); ++i)
         {
-            String member = jsonObject.getString("member");
-            double longitude = jsonObject.getDouble("longitude");
-            double latitude = jsonObject.getDouble("latitude");
+            JSONObject obj = (JSONObject)arr.get(i);
+
+            String member = obj.getString("member");
+            double longitude = Double.parseDouble(obj.getString("longitude"));
+            double latitude = Double.parseDouble(obj.getString("latitude"));
 
             result.second[i] = new Location(member, new Coordinate(longitude, latitude));
         }
@@ -159,8 +160,8 @@ public class JsonHelper
         String group = jsonObject.getString("group");
         String member = jsonObject.getString("member");
         String text = jsonObject.getString("text");
-        double longitude = jsonObject.getDouble("longitude");
-        double latitude = jsonObject.getDouble("latitude");
+        double longitude = Double.parseDouble(jsonObject.getString("longitude"));
+        double latitude = Double.parseDouble(jsonObject.getString("latitude"));
         String imageid = jsonObject.getString("imageid");
         String port = jsonObject.getString("port");
 
@@ -254,8 +255,8 @@ public class JsonHelper
             writer.beginObject()
                     .name("type").value("location")
                     .name("id").value(id)
-                    .name("longitude").value(longitude)
-                    .name("latitude").value(latitude).endObject();
+                    .name("longitude").value(String.valueOf(longitude))
+                    .name("latitude").value(String.valueOf(latitude)).endObject();
         }
         catch (IOException exception)
         {
@@ -294,8 +295,8 @@ public class JsonHelper
                     .name("type").value("imagechat")
                     .name("id").value(id)
                     .name("text").value(text)
-                    .name("longitude").value(longitude)
-                    .name("latitude").value(latitude).endObject();
+                    .name("longitude").value(String.valueOf(longitude))
+                    .name("latitude").value(String.valueOf(latitude)).endObject();
         }
         catch (IOException exception)
         {

@@ -17,9 +17,10 @@ public class ChatFragment extends Fragment
 {
     private EditText messageField;
     private ImageButton btnUpload;
+    private ImageButton btnBack;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
@@ -33,6 +34,7 @@ public class ChatFragment extends Fragment
     {
         messageField = view.findViewById(R.id.etMessage);
         btnUpload = view.findViewById(R.id.btnUpload);
+        btnBack = view.findViewById(R.id.btnBack);
     }
 
     private void registerListeners()
@@ -52,6 +54,11 @@ public class ChatFragment extends Fragment
         btnUpload.setOnClickListener(view ->
         {
 
+        });
+
+        btnBack.setOnClickListener(view ->
+        {
+            getParentFragmentManager().popBackStack();
         });
     }
 

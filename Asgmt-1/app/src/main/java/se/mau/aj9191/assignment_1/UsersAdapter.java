@@ -3,6 +3,7 @@ package se.mau.aj9191.assignment_1;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
@@ -12,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersHolder>
+public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersHolder>
 {
     private ArrayList<String> users = new ArrayList<>();
 
@@ -25,8 +26,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersHolder>
 
             users = new ArrayList<>(Arrays.asList(members.second));
             notifyDataSetChanged();
-
-            viewModel.getMembersLiveData().removeObservers(lifecycleOwner);
         });
     }
 
@@ -35,6 +34,22 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersHolder>
     {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.user_row, viewGroup, false);
         return new UsersHolder(view);
+    }
+
+    public static class UsersHolder extends RecyclerView.ViewHolder
+    {
+        private final TextView tvUsername;
+
+        public UsersHolder(@NonNull View itemView)
+        {
+            super(itemView);
+            tvUsername = itemView.findViewById(R.id.tvUsername);
+        }
+
+        public TextView getUsernameView()
+        {
+            return tvUsername;
+        }
     }
 
     @Override

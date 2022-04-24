@@ -2,20 +2,21 @@ package se.mau.aj9191.assignment_1;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
+import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,8 +30,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener {
     private static int UPDATE_INTERVAL = 30000;
     private static int UPDATE_DISTANCE = 0;
 
@@ -46,14 +48,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private boolean languageSet = false;
 
-    private final HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
+    private HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
-        initializeComponents(view, savedInstance);
+        if (savedInstanceState != null)
+            mapMarkers = (HashMap<String, ArrayList<Marker>>)savedInstanceState.getSerializable("Markers");
+
+        initializeComponents(view, savedInstanceState);
         registerListeners();
+
+        requestPermissions();
 
         String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
         languageSet = !currentLanguage.equals("en");
@@ -61,16 +69,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         return view;
     }
 
-    @SuppressLint("MissingPermission")
-    private void initializeComponents(View view, Bundle savedInstance)
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        locationManager = view.getContext().getSystemService(LocationManager.class);
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putSerializable("Markers", mapMarkers);
+    }
+
+    private void initializeComponents(View view, Bundle savedInstanceState)
+    {
+        locationManager = (LocationManager) view.getContext().getSystemService(Context.LOCATION_SERVICE);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-
         mapView = view.findViewById(R.id.mapView);
-        mapView.onCreate(savedInstance);
+        mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
         btnGroups = view.findViewById(R.id.btnGroups);
@@ -88,10 +100,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     {
         btnGroups.setOnClickListener(view ->
         {
-            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(R.id.fcvMain, new GroupsFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fcvMain, new GroupsFragment())
+                    .addToBackStack(null).commit();
         });
         btnLanguage.setOnClickListener(view ->
         {
@@ -110,7 +121,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         map = googleMap;
-        map.setMyLocationEnabled(true);
 
         viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupLocations ->
         {
@@ -185,6 +195,44 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     }
 
     @Override
+    public void onProviderEnabled(@NonNull String provider)
+    {
+
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider)
+    {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras)
+    {
+
+    }
+
+    private void requestPermissions()
+    {
+        @SuppressLint("MissingPermission") ActivityResultLauncher<String> permissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
+        {
+            if (result)
+            {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+                map.setMyLocationEnabled(true);
+            }
+        });
+
+        permissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker)
+    {
+        return false;
+    }
+
+    @Override
     public void onResume()
     {
         super.onResume();
@@ -219,4 +267,5 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         if (mapView != null)
             mapView.onLowMemory();
     }
+
 }
