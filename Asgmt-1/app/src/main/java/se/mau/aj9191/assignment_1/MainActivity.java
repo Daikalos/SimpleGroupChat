@@ -56,4 +56,9 @@ public class MainActivity extends AppCompatActivity
         else
             getSupportFragmentManager().popBackStack();
     }
+
+    public Controller getController()
+    {
+        return controller;
+    }
 }

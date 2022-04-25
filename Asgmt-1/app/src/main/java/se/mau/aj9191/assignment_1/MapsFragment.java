@@ -205,7 +205,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         for (int i = 0; i < viewModel.getGroupsSize(); ++i)
         {
             Group group = viewModel.getGroup(i);
-            Controller.sendMessage(JsonHelper.sendLocation(group.getId(), longitude, latitude));
+            ((MainActivity)getActivity()).getController()
+                    .sendMessage(JsonHelper.sendLocation(group.getId(), longitude, latitude));
         }
     }
 

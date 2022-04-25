@@ -66,7 +66,9 @@ public class UsersFragment extends Fragment
         super.onResume();
 
         group = viewModel.getGroup(groupName);
-        Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+
+        ((MainActivity)getActivity()).getController()
+                .sendMessage(JsonHelper.sendGetMembers(groupName));
     }
 
     @Override
@@ -143,7 +145,8 @@ public class UsersFragment extends Fragment
                 this.group = group;
 
                 enableControls();
-                Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+                ((MainActivity)getActivity()).getController()
+                        .sendMessage(JsonHelper.sendGetMembers(groupName));
             }
         });
 
@@ -152,7 +155,8 @@ public class UsersFragment extends Fragment
             if (group != null && id.equals(group.getId()))
             {
                 disableControls();
-                Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+                ((MainActivity)getActivity()).getController()
+                        .sendMessage(JsonHelper.sendGetMembers(groupName));
             }
         });
 
@@ -183,7 +187,8 @@ public class UsersFragment extends Fragment
                 return;
             }
 
-            Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
+            ((MainActivity)getActivity()).getController()
+                    .sendMessage(JsonHelper.sendRegister(groupName, username));
         });
         builder.setNegativeButton("Cancel", null);
 
@@ -197,7 +202,8 @@ public class UsersFragment extends Fragment
     }
     private void leaveGroup()
     {
-        Controller.sendMessage(JsonHelper.sendUnregister(group.getId()));
+        ((MainActivity)getActivity()).getController()
+                .sendMessage(JsonHelper.sendUnregister(group.getId()));
     }
 
     private void disableControls()

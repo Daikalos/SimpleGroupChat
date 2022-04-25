@@ -140,14 +140,16 @@ public class ChatFragment extends Fragment
         {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             {
-                Controller.sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                ((MainActivity)getActivity()).getController()
+                        .sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
             }
             else
             {
                 ActivityResultLauncher<String> photoPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
                 {
                     if (result)
-                        Controller.sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                        ((MainActivity)getActivity()).getController()
+                                .sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
                 });
 
                 photoPermissionResult.launch(Manifest.permission.CAMERA);
@@ -225,6 +227,7 @@ public class ChatFragment extends Fragment
         if (message.isEmpty())
             return;
 
-        Controller.sendMessage(JsonHelper.sendEnterText(group.getId(), message));
+        ((MainActivity)getActivity()).getController()
+                .sendMessage(JsonHelper.sendEnterText(group.getId(), message));
     }
 }

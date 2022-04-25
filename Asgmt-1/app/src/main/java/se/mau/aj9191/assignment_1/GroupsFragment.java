@@ -56,7 +56,8 @@ public class GroupsFragment extends Fragment
     public void onResume()
     {
         super.onResume();;
-        Controller.sendMessage(JsonHelper.sendGetGroups());
+        ((MainActivity)getActivity()).getController()
+                .sendMessage(JsonHelper.sendGetGroups());
     }
 
     private void initializeComponents(View view)
@@ -102,7 +103,8 @@ public class GroupsFragment extends Fragment
                     return;
                 }
 
-                Controller.sendMessage(JsonHelper.sendRegister(groupName, username));
+                ((MainActivity)getActivity()).getController()
+                        .sendMessage(JsonHelper.sendRegister(groupName, username));
 
                 ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fcvMain, new UsersFragment(groupName))

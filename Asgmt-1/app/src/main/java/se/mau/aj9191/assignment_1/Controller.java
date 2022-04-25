@@ -13,7 +13,7 @@ public class Controller
     private final MainActivity mainActivity;
     private final MainViewModel viewModel;
 
-    private static NetworkService networkService;
+    private NetworkService networkService;
     private boolean bound = false;
 
     private Listener listener;
@@ -39,7 +39,7 @@ public class Controller
         }
     }
 
-    public static void sendMessage(String message)
+    public void sendMessage(String message)
     {
         networkService.sendMessage(message);
     }
