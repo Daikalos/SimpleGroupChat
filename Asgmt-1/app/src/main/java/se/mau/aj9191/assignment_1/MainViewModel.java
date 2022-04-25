@@ -10,22 +10,22 @@ import java.util.ArrayList;
 
 public class MainViewModel extends ViewModel
 {
-    private final MutableLiveData<Group> register = new MutableLiveData<>(); // id, group
-    private final MutableLiveData<String> unregister = new MutableLiveData<>();
+    private final SingleLiveEvent<Group> register = new SingleLiveEvent<>(); // id, group
+    private final SingleLiveEvent<String> unregister = new SingleLiveEvent<>();
 
-    private final MutableLiveData<String[]> groups = new MutableLiveData<>();
-    private final MutableLiveData<Pair<String, String[]>> members = new MutableLiveData<>(); // group, members
+    private final SingleLiveEvent<String[]> groups = new SingleLiveEvent<>();
+    private final SingleLiveEvent<Pair<String, String[]>> members = new SingleLiveEvent<>(); // group, members
 
-    private final MutableLiveData<Location> location = new MutableLiveData<>();
-    private final MutableLiveData<Pair<String, Location[]>> locations = new MutableLiveData<>(); // group, locations
+    private final SingleLiveEvent<Location> location = new SingleLiveEvent<>();
+    private final SingleLiveEvent<Pair<String, Location[]>> locations = new SingleLiveEvent<>(); // group, locations
 
-    private final MutableLiveData<Group> viewable = new MutableLiveData<>();
+    private final SingleLiveEvent<Group> viewable = new SingleLiveEvent<>();
 
-    private final MutableLiveData<SendText> sentText = new MutableLiveData<>();
-    private final MutableLiveData<SendImage> sentImage = new MutableLiveData<>();
+    private final SingleLiveEvent<SendText> sentText = new SingleLiveEvent<>();
+    private final SingleLiveEvent<SendImage> sentImage = new SingleLiveEvent<>();
 
-    private final MutableLiveData<TextMessage> textMessage = new MutableLiveData<>();
-    private final MutableLiveData<ImageMessage> imageMessage = new MutableLiveData<>();
+    private final SingleLiveEvent<TextMessage> textMessage = new SingleLiveEvent<>();
+    private final SingleLiveEvent<ImageMessage> imageMessage = new SingleLiveEvent<>();
 
     private final ArrayList<Group> joinedGroups = new ArrayList<>();
 
@@ -90,11 +90,23 @@ public class MainViewModel extends ViewModel
 
     public void postTextMessage(TextMessage textMessage)
     {
-        this.textMessage.postValue(textMessage);
+        Group group = joinedGroups.stream().filter(o -> textMessage.groupName.equals(o.getName())).findFirst().orElse(null);
+
+        if (group != null)
+        {
+            group.addMessage(textMessage);
+            this.textMessage.postValue(textMessage);
+        }
     }
     public void postImageMessage(ImageMessage imageMessage)
     {
-        this.imageMessage.postValue(imageMessage);
+        Group group = joinedGroups.stream().filter(o -> imageMessage.groupName.equals(o.getName())).findFirst().orElse(null);
+
+        if (group != null)
+        {
+            group.addMessage(imageMessage);
+            this.imageMessage.postValue(imageMessage);
+        }
     }
 
     public LiveData<Group> getRegisterLiveData()

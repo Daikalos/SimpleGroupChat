@@ -60,11 +60,11 @@ public class UsersFragment extends Fragment
         {
             groupName = savedInstanceState.getString("GroupName");
             data = savedInstanceState.getStringArrayList("UsersList");
-
-            group = viewModel.joinedGroup(groupName);
         }
         else
             data = new ArrayList<>();
+
+        group = viewModel.joinedGroup(groupName);
     }
 
     @Override

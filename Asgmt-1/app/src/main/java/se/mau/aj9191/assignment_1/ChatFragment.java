@@ -32,7 +32,6 @@ public class ChatFragment extends Fragment
     private ImageButton btnBack;
     private RecyclerView rvChat;
 
-    private ArrayList<TextMessage> data;
     private ChatAdapter chatAdapter;
 
     private Group group;
@@ -51,18 +50,12 @@ public class ChatFragment extends Fragment
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         if (savedInstanceState != null)
-        {
-            data = savedInstanceState.getParcelableArrayList("MessagesList");
             group = (Group)savedInstanceState.getSerializable("ChatGroup");
-        }
-        else
-            data = new ArrayList<>();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putParcelableArrayList("MessagesList", data);
         savedInstanceState.putSerializable("ChatGroup", group);
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -92,7 +85,7 @@ public class ChatFragment extends Fragment
         linearLayoutManager.setStackFromEnd(true);
 
         rvChat.setLayoutManager(linearLayoutManager);
-        rvChat.setAdapter(chatAdapter = new ChatAdapter(data));
+        rvChat.setAdapter(chatAdapter = new ChatAdapter(group.getMessages()));
         rvChat.addItemDecoration(new DividerItemDecoration(rvChat.getContext(), DividerItemDecoration.VERTICAL));
 
         tvGroupName.setText(group.getName());
@@ -129,23 +122,22 @@ public class ChatFragment extends Fragment
             if (!group.getName().equals(textMessage.groupName))
                 return;
 
-            data.add(textMessage);
-
-            if (chatAdapter != null)
-                chatAdapter.notifyItemChanged(data.size() - 1);
+            chatAdapter.notifyItemChanged(group.getMessagesSize() - 1);
         });
         viewModel.getImageMessageLiveData().observe(getViewLifecycleOwner(), imageMessage ->
         {
             if (!group.getName().equals(imageMessage.groupName))
                 return;
 
-            data.add(imageMessage);
-            chatAdapter.notifyItemChanged(data.size() - 1);
+            chatAdapter.notifyItemChanged(group.getMessagesSize() - 1);
         });
     }
 
     private void sendMessage(String message)
     {
+        if (message.isEmpty())
+            return;
+
         Controller.sendMessage(JsonHelper.sendEnterText(group.getId(), message));
     }
 }
