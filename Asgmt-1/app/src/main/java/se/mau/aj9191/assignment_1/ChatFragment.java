@@ -54,8 +54,6 @@ public class ChatFragment extends Fragment
         {
             data = savedInstanceState.getParcelableArrayList("MessagesList");
             group = (Group)savedInstanceState.getSerializable("ChatGroup");
-
-            Log.d("error", "LOAD: " + data.size());
         }
         else
             data = new ArrayList<>();

@@ -142,7 +142,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             Group group = viewModel.joinedGroup(groupName);
 
             if (group == null || !group.viewable)
+            {
+                if (group == null && mapMarkers.containsKey(groupName))
+                    clearMarkers(groupName);
+
                 return;
+            }
 
             showUsers(groupName, groupLocations.second);
         });
@@ -152,13 +157,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
             if (mapMarkers.containsKey(groupName))
             {
-                if (!group.viewable)
-                {
-                    for (Marker marker : mapMarkers.get(groupName))
-                        marker.remove();
-
-                    mapMarkers.get(groupName).clear();
-                }
+                for (Marker marker : mapMarkers.get(groupName))
+                    marker.setVisible(group.viewable);
             }
         });
     }
@@ -171,12 +171,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             mapMarkers.put(groupName, markers);
         }
         else
-        {
-            for (Marker marker : mapMarkers.get(groupName))
-                marker.remove();
-
-            mapMarkers.get(groupName).clear();
-        }
+            clearMarkers(groupName);
 
         for (Location loc : locations)
         {
@@ -236,6 +231,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
             permissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+    }
+
+    private void clearMarkers(String groupName)
+    {
+        ArrayList<Marker> markers = mapMarkers.get(groupName);
+
+        for (Marker marker : markers)
+            marker.remove();
+
+        markers.clear();
     }
 
     @Override
