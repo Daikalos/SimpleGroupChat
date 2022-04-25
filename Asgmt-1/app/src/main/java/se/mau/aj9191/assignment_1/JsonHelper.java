@@ -84,12 +84,12 @@ public class JsonHelper
         JSONArray arr = jsonObject.getJSONArray("members");
         String groupName = jsonObject.getString("group");
 
-        Pair<String, String[]> result = new Pair<>(groupName, new String[arr.length()]);
+        Group result = new Group(null, groupName);
 
         for (int i = 0; i < arr.length(); ++i)
         {
             JSONObject obj = (JSONObject)arr.get(i);
-            result.second[i] = obj.getString("member");
+            result.addMember(obj.getString("member"));
         }
 
         viewModel.postMembers(result);
@@ -97,12 +97,12 @@ public class JsonHelper
     public static void parseGroups(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         JSONArray arr = jsonObject.getJSONArray("groups");
-        String[] result = new String[arr.length()];
+        Group[] result = new Group[arr.length()];
 
         for (int i = 0; i < arr.length(); ++i)
         {
             JSONObject obj = (JSONObject)arr.get(i);
-            result[i] = obj.getString("group");
+            result[i] = new Group(null, obj.getString("group"));
         }
 
         viewModel.postGroups(result);
@@ -122,7 +122,7 @@ public class JsonHelper
         JSONArray arr = jsonObject.getJSONArray("location");
         String groupName = jsonObject.getString("group");
 
-        Pair<String, Location[]> result = new Pair<>(groupName, new Location[arr.length()]);
+        Location[] locations = new Location[arr.length()];
 
         for (int i = 0; i < arr.length(); ++i)
         {
@@ -132,10 +132,10 @@ public class JsonHelper
             double longitude = Double.parseDouble(obj.getString("longitude"));
             double latitude = Double.parseDouble(obj.getString("latitude"));
 
-            result.second[i] = new Location(member, longitude, latitude);
+            locations[i] = new Location(member, longitude, latitude);
         }
 
-        viewModel.postLocations(result);
+        viewModel.postLocations(groupName, locations);
     }
     public static void parseEnterText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {

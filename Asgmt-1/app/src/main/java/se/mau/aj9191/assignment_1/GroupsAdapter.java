@@ -17,9 +17,9 @@ import java.util.Arrays;
 
 public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupsHolder>
 {
-    private final ArrayList<String> groups;
+    private final ArrayList<Group> groups;
 
-    public GroupsAdapter(ArrayList<String> groups)
+    public GroupsAdapter(ArrayList<Group> groups)
     {
         this.groups = groups;
     }
@@ -35,7 +35,7 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupsHold
     @Override
     public void onBindViewHolder(@NonNull GroupsHolder groupHolder, int position)
     {
-        groupHolder.getGroupNameView().setText(groups.get(position));
+        groupHolder.getGroupNameView().setText(groups.get(position).getName());
     }
 
     @Override

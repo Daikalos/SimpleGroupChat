@@ -139,17 +139,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupLocations ->
         {
             String groupName = groupLocations.first;
-            Group group = viewModel.joinedGroup(groupName);
+            Group group = viewModel.getGroup(groupName);
 
-            if (group == null || !group.viewable)
+            if (group == null)
             {
-                if (group == null && mapMarkers.containsKey(groupName))
+                if (mapMarkers.containsKey(groupName))
                     clearMarkers(groupName);
 
                 return;
             }
 
-            showUsers(groupName, groupLocations.second);
+            showUsers(group, groupLocations.second);
         });
         viewModel.getViewableLiveData().observe(getViewLifecycleOwner(), group ->
         {
@@ -163,8 +163,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         });
     }
 
-    private void showUsers(String groupName, Location[] locations)
+    private void showUsers(Group group, Location[] locations)
     {
+        String groupName = group.getName();
+
         if (!mapMarkers.containsKey(groupName))
         {
             ArrayList<Marker> markers = new ArrayList<>(locations.length);
@@ -188,6 +190,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             markerOptions.snippet(loc.getMember() + " last recorded location");
 
             Marker marker = map.addMarker(markerOptions);
+            marker.setVisible(group.viewable);
+
             mapMarkers.get(groupName).add(marker);
         }
     }

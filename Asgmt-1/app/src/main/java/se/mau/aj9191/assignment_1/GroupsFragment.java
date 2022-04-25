@@ -31,21 +31,13 @@ public class GroupsFragment extends Fragment
     private ImageButton btnBack;
     private Button btnNew;
     private RecyclerView rvGroups;
-
-    private ArrayList<String> data;
     private GroupsAdapter groupsAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
-        if (savedInstanceState != null)
-            data = savedInstanceState.getStringArrayList("GroupsList");
-        else
-            data = new ArrayList<>();
     }
 
     @Override
@@ -58,13 +50,6 @@ public class GroupsFragment extends Fragment
         addObservers();
 
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        savedInstanceState.putStringArrayList("GroupsList", data);
-        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -81,7 +66,7 @@ public class GroupsFragment extends Fragment
         rvGroups = view.findViewById(R.id.rvGroups);
 
         rvGroups.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rvGroups.setAdapter(groupsAdapter = new GroupsAdapter(data));
+        rvGroups.setAdapter(groupsAdapter = new GroupsAdapter(viewModel.getAllGroups()));
         rvGroups.addItemDecoration(new DividerItemDecoration(rvGroups.getContext(), DividerItemDecoration.VERTICAL));
     }
 
@@ -138,11 +123,8 @@ public class GroupsFragment extends Fragment
 
     private void addObservers()
     {
-        viewModel.getGroupsLiveData().observe(getViewLifecycleOwner(), groups ->
+        viewModel.getGroupsLiveData().observe(getViewLifecycleOwner(), b ->
         {
-            this.data.clear();
-            this.data.addAll(Arrays.asList(groups));
-
             groupsAdapter.notifyDataSetChanged();
         });
     }

@@ -7,10 +7,11 @@ import java.util.ArrayList;
 
 public class Group implements Serializable
 {
-    private final String id, name;
+    public String id, name;
     public boolean viewable = true;
 
     private ArrayList<TextMessage> messages = new ArrayList<>();
+    private ArrayList<String> members = new ArrayList<>();
 
     public Group(String id, String name)
     {
@@ -42,5 +43,23 @@ public class Group implements Serializable
     public int getMessagesSize()
     {
         return messages.size();
+    }
+
+    public ArrayList<String> getMembers()
+    {
+        return members;
+    }
+    public void addMember(String member)
+    {
+        members.add(member);
+    }
+    public void setMembers(ArrayList<String> members)
+    {
+        members.clear();
+        members.addAll(members);
+    }
+    public int getMembersSize()
+    {
+        return members.size();
     }
 }

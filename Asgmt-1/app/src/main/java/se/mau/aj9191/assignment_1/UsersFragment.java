@@ -36,12 +36,10 @@ public class UsersFragment extends Fragment
     private Button btnChat;
     private Button btnAction;
     private RecyclerView rvUsers;
+    private UsersAdapter usersAdapter;
 
     private String groupName;
     private Group group = null;
-
-    private ArrayList<String> data;
-    private UsersAdapter usersAdapter;
 
     public UsersFragment() { }
     public UsersFragment(String groupName)
@@ -57,14 +55,9 @@ public class UsersFragment extends Fragment
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         if (savedInstanceState != null)
-        {
             groupName = savedInstanceState.getString("GroupName");
-            data = savedInstanceState.getStringArrayList("UsersList");
-        }
-        else
-            data = new ArrayList<>();
 
-        group = viewModel.joinedGroup(groupName);
+        group = viewModel.getGroup(groupName);
     }
 
     @Override
@@ -72,7 +65,7 @@ public class UsersFragment extends Fragment
     {
         super.onResume();
 
-        group = viewModel.joinedGroup(groupName);
+        group = viewModel.getGroup(groupName);
         Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
     }
 
@@ -80,8 +73,6 @@ public class UsersFragment extends Fragment
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
         savedInstanceState.putString("GroupName", groupName);
-        savedInstanceState.putStringArrayList("UsersList", data);
-
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -106,7 +97,7 @@ public class UsersFragment extends Fragment
         rvUsers = view.findViewById(R.id.rvUsers);
 
         rvUsers.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rvUsers.setAdapter(usersAdapter = new UsersAdapter(data));
+        rvUsers.setAdapter(usersAdapter = new UsersAdapter(viewModel.getAllMembers()));
         rvUsers.addItemDecoration(new DividerItemDecoration(rvUsers.getContext(), DividerItemDecoration.VERTICAL));
 
         tvGroupName.setText(groupName);
@@ -165,14 +156,8 @@ public class UsersFragment extends Fragment
             }
         });
 
-        viewModel.getMembersLiveData().observe(getViewLifecycleOwner(), members ->
+        viewModel.getMembersLiveData().observe(getViewLifecycleOwner(), b ->
         {
-            if (!members.first.equals(groupName))
-                return;
-
-            data.clear();
-            data.addAll(Arrays.asList(members.second));
-
             usersAdapter.notifyDataSetChanged();
         });
     }

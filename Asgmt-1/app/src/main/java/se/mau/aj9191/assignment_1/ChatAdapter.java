@@ -3,6 +3,7 @@ package se.mau.aj9191.assignment_1;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -78,13 +79,16 @@ public class ChatAdapter extends RecyclerView.Adapter
     }
     public static class ImageChatHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
-        private final TextView tvGroupName;
+        private final TextView tvUsername;
+        private ImageView ivImageChat;
+
+        private ImageMessage imageMessage;
 
         public ImageChatHolder(@NonNull View itemView)
         {
             super(itemView);
 
-            tvGroupName = itemView.findViewById(R.id.tvGroupName);
+            tvUsername = itemView.findViewById(R.id.tvUsername);
 
             itemView.setOnClickListener(this);
         }
@@ -97,7 +101,7 @@ public class ChatAdapter extends RecyclerView.Adapter
 
         public void bind(ImageMessage imageMessage)
         {
-
+            this.imageMessage = imageMessage;
         }
     }
 }

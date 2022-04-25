@@ -6,28 +6,23 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class MainViewModel extends ViewModel
 {
-    private final SingleLiveEvent<Group> register = new SingleLiveEvent<>(); // id, group
-    private final SingleLiveEvent<String> unregister = new SingleLiveEvent<>();
-
-    private final SingleLiveEvent<String[]> groups = new SingleLiveEvent<>();
-    private final SingleLiveEvent<Pair<String, String[]>> members = new SingleLiveEvent<>(); // group, members
-
-    private final SingleLiveEvent<Location> location = new SingleLiveEvent<>();
-    private final SingleLiveEvent<Pair<String, Location[]>> locations = new SingleLiveEvent<>(); // group, locations
-
-    private final SingleLiveEvent<Group> viewable = new SingleLiveEvent<>();
-
-    private final SingleLiveEvent<SendText> sentText = new SingleLiveEvent<>();
-    private final SingleLiveEvent<SendImage> sentImage = new SingleLiveEvent<>();
-
-    private final SingleLiveEvent<TextMessage> textMessage = new SingleLiveEvent<>();
-    private final SingleLiveEvent<ImageMessage> imageMessage = new SingleLiveEvent<>();
+    // --- DATA ---
 
     private final ArrayList<Group> joinedGroups = new ArrayList<>();
+
+    private final ArrayList<Group> groups = new ArrayList<>();
+    private final ArrayList<String> members = new ArrayList<>();
 
     public int getGroupsSize()
     {
@@ -37,7 +32,7 @@ public class MainViewModel extends ViewModel
     {
         return joinedGroups.get(index);
     }
-    public Group joinedGroup(String groupName)
+    public Group getGroup(String groupName)
     {
         if (groupName == null || groupName.isEmpty())
             return null;
@@ -45,47 +40,81 @@ public class MainViewModel extends ViewModel
         return joinedGroups.stream().filter(o -> groupName.equals(o.getName())).findFirst().orElse(null);
     }
 
+    public ArrayList<Group> getAllGroups()
+    {
+        return groups;
+    }
+    public ArrayList<String> getAllMembers()
+    {
+        return members;
+    }
+
+    // --- EVENTS ---
+
+    private final SingleLiveEvent<Group> registerEvent = new SingleLiveEvent<>(); // id, group
+    private final SingleLiveEvent<String> unregisterEvent = new SingleLiveEvent<>();
+
+    private final SingleLiveEvent<Boolean> getMembersEvent = new SingleLiveEvent<>();
+    private final SingleLiveEvent<Boolean> getGroupsEvent = new SingleLiveEvent<>();
+
+    private final SingleLiveEvent<Location> locationEvent = new SingleLiveEvent<>();
+    private final SingleLiveEvent<Pair<String, Location[]>> locationsEvent = new SingleLiveEvent<>(); // group, locations
+
+    private final SingleLiveEvent<Group> viewableEvent = new SingleLiveEvent<>();
+
+    private final SingleLiveEvent<SendText> sentTextEvent = new SingleLiveEvent<>();
+    private final SingleLiveEvent<SendImage> sentImageEvent = new SingleLiveEvent<>();
+
+    private final SingleLiveEvent<TextMessage> textMessageEvent = new SingleLiveEvent<>();
+    private final SingleLiveEvent<ImageMessage> imageMessageEvent = new SingleLiveEvent<>();
+
     public void postRegister(Group group)
     {
         joinedGroups.add(group);
-        register.postValue(group);
+        registerEvent.postValue(group);
     }
     public void postUnregister(String id)
     {
         joinedGroups.removeIf(group -> id.equals(group.getId()));
-        unregister.postValue(id);
+        unregisterEvent.postValue(id);
     }
 
-    public void postMembers(Pair<String, String[]> members)
+    public void postMembers(Group members)
     {
-        this.members.postValue(members);
+        this.members.clear();
+        this.members.addAll(members.getMembers());
+
+        getMembersEvent.postValue(true);
     }
-    public void postGroups(String[] groups)
+    public void postGroups(Group[] groups)
     {
-        this.groups.postValue(groups);
+        this.groups.clear();
+        this.groups.addAll(Arrays.asList(groups));
+
+        getGroupsEvent.postValue(true);
     }
 
     public void postLocation(Location location)
     {
-        this.location.postValue(location);
+        this.locationEvent.postValue(location);
     }
-    public void postLocations(Pair<String, Location[]> locations)
+    public void postLocations(String groupName, Location[] locations)
     {
-        this.locations.postValue(locations);
+        this.locationsEvent.postValue(new Pair<>(groupName, locations));
     }
 
     public void postViewable(Group group)
     {
-        viewable.postValue(group);
+        viewableEvent.postValue(group);
     }
 
     public void postSentText(SendText sendText)
     {
-        this.sentText.postValue(sendText);
+        this.sentTextEvent.postValue(sendText);
     }
     public void postSentImage(SendImage sendImage)
     {
-        this.sentImage.postValue(sendImage);
+        this.sentImageEvent.postValue(sendImage);
     }
 
     public void postTextMessage(TextMessage textMessage)
@@ -95,7 +124,7 @@ public class MainViewModel extends ViewModel
         if (group != null)
         {
             group.addMessage(textMessage);
-            this.textMessage.postValue(textMessage);
+            this.textMessageEvent.postValue(textMessage);
         }
     }
     public void postImageMessage(ImageMessage imageMessage)
@@ -105,57 +134,57 @@ public class MainViewModel extends ViewModel
         if (group != null)
         {
             group.addMessage(imageMessage);
-            this.imageMessage.postValue(imageMessage);
+            this.imageMessageEvent.postValue(imageMessage);
         }
     }
 
     public LiveData<Group> getRegisterLiveData()
     {
-        return register;
+        return registerEvent;
     }
     public LiveData<String> getUnregisterLiveData()
     {
-        return unregister;
+        return unregisterEvent;
     }
 
-    public LiveData<String[]> getGroupsLiveData()
+    public LiveData<Boolean> getMembersLiveData()
     {
-        return groups;
+        return getMembersEvent;
     }
-    public LiveData<Pair<String, String[]>> getMembersLiveData()
+    public LiveData<Boolean> getGroupsLiveData()
     {
-        return members;
+        return getGroupsEvent;
     }
 
     public LiveData<Location> getLocationLiveData()
     {
-        return location;
+        return locationEvent;
     }
     public LiveData<Pair<String, Location[]>> getLocationsLiveData()
     {
-        return locations;
+        return locationsEvent;
     }
 
     public LiveData<Group> getViewableLiveData()
     {
-        return viewable;
+        return viewableEvent;
     }
 
     public LiveData<SendText> getSentTextLiveData()
     {
-        return sentText;
+        return sentTextEvent;
     }
-    public LiveData<SendImage> getSentImage()
+    public LiveData<SendImage> getSentImageLiveData()
     {
-        return sentImage;
+        return sentImageEvent;
     }
 
     public LiveData<TextMessage> getTextMessageLiveData()
     {
-        return textMessage;
+        return textMessageEvent;
     }
     public LiveData<ImageMessage> getImageMessageLiveData()
     {
-        return imageMessage;
+        return imageMessageEvent;
     }
 }
