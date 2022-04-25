@@ -19,16 +19,12 @@ import android.widget.LinearLayout;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 public class MainActivity extends AppCompatActivity
 {
     private Controller controller;
-
-    public MainActivity()
-    {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

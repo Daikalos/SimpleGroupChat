@@ -2,6 +2,7 @@ package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class UsersFragment extends Fragment
 {
     private MainViewModel viewModel;
@@ -36,6 +40,9 @@ public class UsersFragment extends Fragment
     private String groupName;
     private Group group = null;
 
+    private ArrayList<String> data;
+    private UsersAdapter usersAdapter;
+
     public UsersFragment() { }
     public UsersFragment(String groupName)
     {
@@ -43,12 +50,45 @@ public class UsersFragment extends Fragment
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        if (savedInstanceState != null)
+        {
+            groupName = savedInstanceState.getString("GroupName");
+            data = savedInstanceState.getStringArrayList("UsersList");
+
+            group = viewModel.joinedGroup(groupName);
+        }
+        else
+            data = new ArrayList<>();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        group = viewModel.joinedGroup(groupName);
+        Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putString("GroupName", groupName);
+        savedInstanceState.putStringArrayList("UsersList", data);
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_users, container, false);
-
-        if (savedInstanceState != null)
-            groupName = savedInstanceState.getString("GroupName");
 
         initializeComponents(view);
         registerListeners();
@@ -57,34 +97,16 @@ public class UsersFragment extends Fragment
         return view;
     }
 
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-
-        Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
-        group = viewModel.joinedGroup(groupName);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString("GroupName", groupName);
-    }
-
     private void initializeComponents(View view)
     {
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
         tvGroupName = view.findViewById(R.id.tvGroupName);
         btnBack = view.findViewById(R.id.btnBack);
         btnChat = view.findViewById(R.id.btnChat);
         btnAction = view.findViewById(R.id.btnAction);
         rvUsers = view.findViewById(R.id.rvUsers);
 
-        rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvUsers.setAdapter(new UsersAdapter(groupName, viewModel, getViewLifecycleOwner()));
+        rvUsers.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvUsers.setAdapter(usersAdapter = new UsersAdapter(data));
         rvUsers.addItemDecoration(new DividerItemDecoration(rvUsers.getContext(), DividerItemDecoration.VERTICAL));
 
         tvGroupName.setText(groupName);
@@ -115,9 +137,9 @@ public class UsersFragment extends Fragment
         btnAction.setOnClickListener(view ->
         {
             if (group != null)
-                leaveGroup(view);
+                leaveGroup();
             else
-                enterGroup(view);
+                enterGroup();
         });
     }
 
@@ -133,6 +155,7 @@ public class UsersFragment extends Fragment
                 Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
             }
         });
+
         viewModel.getUnregisterLiveData().observe(getViewLifecycleOwner(), id ->
         {
             if (group != null && id.equals(group.getId()))
@@ -141,9 +164,20 @@ public class UsersFragment extends Fragment
                 Controller.sendMessage(JsonHelper.sendGetMembers(groupName));
             }
         });
+
+        viewModel.getMembersLiveData().observe(getViewLifecycleOwner(), members ->
+        {
+            if (!members.first.equals(groupName))
+                return;
+
+            data.clear();
+            data.addAll(Arrays.asList(members.second));
+
+            usersAdapter.notifyDataSetChanged();
+        });
     }
 
-    private void enterGroup(View view)
+    private void enterGroup()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
@@ -171,12 +205,12 @@ public class UsersFragment extends Fragment
         layout.addView(edUsername);
 
         AlertDialog dialog = builder.create();
-        dialog.setTitle("Create group");
+        dialog.setTitle("Enter group");
         dialog.setView(layout);
 
         dialog.show();
     }
-    private void leaveGroup(View view)
+    private void leaveGroup()
     {
         Controller.sendMessage(JsonHelper.sendUnregister(group.getId()));
     }

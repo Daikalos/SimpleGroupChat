@@ -21,6 +21,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class GroupsFragment extends Fragment
 {
     private MainViewModel viewModel;
@@ -29,6 +32,22 @@ public class GroupsFragment extends Fragment
     private Button btnNew;
     private RecyclerView rvGroups;
 
+    private ArrayList<String> data;
+    private GroupsAdapter groupsAdapter;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        if (savedInstanceState != null)
+            data = savedInstanceState.getStringArrayList("GroupsList");
+        else
+            data = new ArrayList<>();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -36,8 +55,16 @@ public class GroupsFragment extends Fragment
 
         initializeComponents(view);
         registerListeners();
+        addObservers();
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putStringArrayList("GroupsList", data);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -49,14 +76,12 @@ public class GroupsFragment extends Fragment
 
     private void initializeComponents(View view)
     {
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
         btnBack = view.findViewById(R.id.btnBack);
         btnNew = view.findViewById(R.id.btnNew);
         rvGroups = view.findViewById(R.id.rvGroups);
 
-        rvGroups.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvGroups.setAdapter(new GroupsAdapter(viewModel, getViewLifecycleOwner()));
+        rvGroups.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvGroups.setAdapter(groupsAdapter = new GroupsAdapter(data));
         rvGroups.addItemDecoration(new DividerItemDecoration(rvGroups.getContext(), DividerItemDecoration.VERTICAL));
     }
 
@@ -108,6 +133,17 @@ public class GroupsFragment extends Fragment
             dialog.setView(layout);
 
             dialog.show();
+        });
+    }
+
+    private void addObservers()
+    {
+        viewModel.getGroupsLiveData().observe(getViewLifecycleOwner(), groups ->
+        {
+            this.data.clear();
+            this.data.addAll(Arrays.asList(groups));
+
+            groupsAdapter.notifyDataSetChanged();
         });
     }
 }

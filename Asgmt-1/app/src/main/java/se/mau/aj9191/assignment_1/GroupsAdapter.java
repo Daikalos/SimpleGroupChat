@@ -17,15 +17,11 @@ import java.util.Arrays;
 
 public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupsHolder>
 {
-    private ArrayList<String> groups = new ArrayList<>();
+    private final ArrayList<String> groups;
 
-    public GroupsAdapter(MainViewModel viewModel, LifecycleOwner lifecycleOwner)
+    public GroupsAdapter(ArrayList<String> groups)
     {
-        viewModel.getGroupsLiveData().observe(lifecycleOwner, groups ->
-        {
-            this.groups = new ArrayList<>(Arrays.asList(groups));
-            notifyDataSetChanged();
-        });
+        this.groups = groups;
     }
 
     @NonNull

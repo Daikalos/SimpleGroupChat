@@ -1,6 +1,8 @@
 package se.mau.aj9191.assignment_1;
 
 import android.os.Bundle;
+import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +14,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 
 public class ChatFragment extends Fragment
 {
@@ -27,6 +32,9 @@ public class ChatFragment extends Fragment
     private ImageButton btnBack;
     private RecyclerView rvChat;
 
+    private ArrayList<TextMessage> data;
+    private ChatAdapter chatAdapter;
+
     private Group group;
 
     public ChatFragment() { }
@@ -36,38 +44,57 @@ public class ChatFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         if (savedInstanceState != null)
-            group = (Group)savedInstanceState.getSerializable("Group");
+        {
+            data = savedInstanceState.getParcelableArrayList("MessagesList");
+            group = (Group)savedInstanceState.getSerializable("ChatGroup");
 
-        initializeComponents(view);
-        registerListeners();
-
-        return view;
+            Log.d("error", "LOAD: " + data.size());
+        }
+        else
+            data = new ArrayList<>();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
+        savedInstanceState.putParcelableArrayList("MessagesList", data);
+        savedInstanceState.putSerializable("ChatGroup", group);
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putSerializable("Group", group);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+
+        initializeComponents(view);
+        registerListeners();
+        addObservers();
+
+        return view;
     }
 
     private void initializeComponents(View view)
     {
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
         tvGroupName = view.findViewById(R.id.tvGroupName);
         etMessage = view.findViewById(R.id.etMessage);
         btnUpload = view.findViewById(R.id.btnUpload);
         btnBack = view.findViewById(R.id.btnBack);
         rvChat = view.findViewById(R.id.rvChat);
 
-        rvChat.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvChat.setAdapter(new ChatAdapter(viewModel));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+
+        rvChat.setLayoutManager(linearLayoutManager);
+        rvChat.setAdapter(chatAdapter = new ChatAdapter(data));
         rvChat.addItemDecoration(new DividerItemDecoration(rvChat.getContext(), DividerItemDecoration.VERTICAL));
 
         tvGroupName.setText(group.getName());
@@ -90,14 +117,37 @@ public class ChatFragment extends Fragment
             }
             return false;
         });
+
         btnUpload.setOnClickListener(view ->
         {
 
         });
     }
 
+    private void addObservers()
+    {
+        viewModel.getTextMessageLiveData().observe(getViewLifecycleOwner(), textMessage ->
+        {
+            if (!group.getName().equals(textMessage.groupName))
+                return;
+
+            data.add(textMessage);
+
+            if (chatAdapter != null)
+                chatAdapter.notifyItemChanged(data.size() - 1);
+        });
+        viewModel.getImageMessageLiveData().observe(getViewLifecycleOwner(), imageMessage ->
+        {
+            if (!group.getName().equals(imageMessage.groupName))
+                return;
+
+            data.add(imageMessage);
+            chatAdapter.notifyItemChanged(data.size() - 1);
+        });
+    }
+
     private void sendMessage(String message)
     {
-
+        Controller.sendMessage(JsonHelper.sendEnterText(group.getId(), message));
     }
 }

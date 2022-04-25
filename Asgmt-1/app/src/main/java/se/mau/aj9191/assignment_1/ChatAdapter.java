@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 public class ChatAdapter extends RecyclerView.Adapter
 {
-    private ArrayList<TextMessage> messages = new ArrayList<>();
+    private ArrayList<TextMessage> messages;
 
-    public ChatAdapter(MainViewModel viewModel)
+    public ChatAdapter(ArrayList<TextMessage> messages)
     {
-
+        this.messages = messages;
     }
 
     @Override

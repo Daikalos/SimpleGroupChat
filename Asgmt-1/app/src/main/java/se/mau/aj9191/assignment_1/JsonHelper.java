@@ -42,12 +42,13 @@ public class JsonHelper
                     break;
                 case "textchat":
                     parseEnterText(viewModel, obj);
+                    parseTextMessage(viewModel, obj);
                     break;
                 case "upload":
                     parseEnterImage(viewModel, obj);
                     break;
                 case "imagechat":
-                    parseReceiveImage(viewModel, obj);
+                    parseImageMessage(viewModel, obj);
                     break;
                 case "exception":
                     parseException(obj);
@@ -138,6 +139,9 @@ public class JsonHelper
     }
     public static void parseEnterText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
+        if (jsonObject.isNull("id"))
+            return;
+
         String id = jsonObject.getString("id");
         String text = jsonObject.getString("text");
 
@@ -154,8 +158,11 @@ public class JsonHelper
 
         viewModel.postSentImage(sendImage);
     }
-    public static void parseReceiveText(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
+    public static void parseTextMessage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
+        if (jsonObject.isNull("group"))
+            return;
+
         String group = jsonObject.getString("group");
         String member = jsonObject.getString("member");
         String text = jsonObject.getString("text");
@@ -164,7 +171,7 @@ public class JsonHelper
 
         viewModel.postTextMessage(result);
     }
-    public static void parseReceiveImage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
+    public static void parseImageMessage(MainViewModel viewModel, JSONObject jsonObject) throws JSONException
     {
         String group = jsonObject.getString("group");
         String member = jsonObject.getString("member");

@@ -3,6 +3,7 @@ package se.mau.aj9191.assignment_1;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -28,6 +30,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -40,46 +43,60 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private MapView mapView;
     private GoogleMap map;
-
     private Button btnGroups;
     private Button btnLanguage;
     private RecyclerView rvViewable;
+    private ViewableAdapter viewableAdapter;
 
+    private HashMap<String, ArrayList<Marker>> mapMarkers; // group, markers
     private boolean languageSet = false;
 
-    private HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        if (savedInstanceState != null)
+            mapMarkers = (HashMap<String, ArrayList<Marker>>)savedInstanceState.getSerializable("Markers");
+        else
+            mapMarkers = new HashMap<>();
+
+        String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
+        languageSet = !currentLanguage.equals("en");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putSerializable("Markers", mapMarkers);
+        super.onSaveInstanceState(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
-        if (savedInstanceState != null)
-            mapMarkers = (HashMap<String, ArrayList<Marker>>)savedInstanceState.getSerializable("Markers");
-
         initializeComponents(view, savedInstanceState);
         registerListeners();
 
         requestPermissions();
 
-        String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
-        languageSet = !currentLanguage.equals("en");
-
         return view;
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
+    public void onMapReady(@NonNull GoogleMap googleMap)
     {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putSerializable("Markers", mapMarkers);
+        map = googleMap;
+        addObservers();
     }
 
     private void initializeComponents(View view, Bundle savedInstanceState)
     {
-        locationManager = (LocationManager) view.getContext().getSystemService(Context.LOCATION_SERVICE);
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -88,14 +105,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         btnLanguage = view.findViewById(R.id.btnLanguage);
         rvViewable = view.findViewById(R.id.rvViewableGroups);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext());
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         linearLayoutManager.setReverseLayout(true);
         linearLayoutManager.setStackFromEnd(true);
 
-        rvViewable.setAdapter(new ViewableAdapter(viewModel));
+        rvViewable.setAdapter(viewableAdapter = new ViewableAdapter(viewModel));
         rvViewable.setLayoutManager(linearLayoutManager);
         rvViewable.addItemDecoration(new DividerItemDecoration(rvViewable.getContext(), DividerItemDecoration.VERTICAL));
     }
+
     private void registerListeners()
     {
         btnGroups.setOnClickListener(view ->
@@ -116,12 +134,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         });
     }
 
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap)
+    private void addObservers()
     {
-        map = googleMap;
-
         viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupLocations ->
         {
             String groupName = groupLocations.first;
@@ -197,6 +211,34 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     }
 
     @Override
+    public boolean onMarkerClick(@NonNull Marker marker)
+    {
+        return false;
+    }
+
+    private void requestPermissions()
+    {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+        }
+        else
+        {
+            @SuppressLint("MissingPermission") ActivityResultLauncher<String> permissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
+            {
+                if (result)
+                {
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+                }
+            });
+
+            permissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
     public void onProviderEnabled(@NonNull String provider)
     {
 
@@ -212,26 +254,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onStatusChanged(String provider, int status, Bundle extras)
     {
 
-    }
-
-    private void requestPermissions()
-    {
-        @SuppressLint("MissingPermission") ActivityResultLauncher<String> permissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
-        {
-            if (result)
-            {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-                map.setMyLocationEnabled(true);
-            }
-        });
-
-        permissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-    }
-
-    @Override
-    public boolean onMarkerClick(@NonNull Marker marker)
-    {
-        return false;
     }
 
     @Override
