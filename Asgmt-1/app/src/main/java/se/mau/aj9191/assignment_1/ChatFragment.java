@@ -1,7 +1,14 @@
 package se.mau.aj9191.assignment_1;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -13,6 +20,16 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistry;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,10 +37,20 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChatFragment extends Fragment
 {
+    private LocationManager locationManager;
     private MainViewModel viewModel;
 
     private TextView tvGroupName;
@@ -111,7 +138,20 @@ public class ChatFragment extends Fragment
 
         btnUpload.setOnClickListener(view ->
         {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+            {
+                Controller.sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+            }
+            else
+            {
+                ActivityResultLauncher<String> photoPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
+                {
+                    if (result)
+                        Controller.sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                });
 
+                photoPermissionResult.launch(Manifest.permission.CAMERA);
+            }
         });
     }
 
@@ -131,6 +171,53 @@ public class ChatFragment extends Fragment
 
             chatAdapter.notifyItemChanged(group.getMessagesSize() - 1);
         });
+
+        viewModel.getSentImageLiveData().observe(getViewLifecycleOwner(), sentImage ->
+        {
+            takePicture(sentImage.imageid, sentImage.port);
+        });
+    }
+
+    private void takePicture(String imageid, String port)
+    {
+        String time = new SimpleDateFormat("yyyMMdd_HHmmss").format(new Date());
+        String filename = "JPEG_" + time;
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), filename);
+        Uri uri = FileProvider.getUriForFile(getActivity().getApplicationContext(), getActivity().getPackageName() + ".camera", file);
+
+        ActivityResultLauncher<Uri> photoResult = registerForActivityResult(new ActivityResultContracts.TakePicture(), result ->
+        {
+            if (result)
+            {
+                Executors.newSingleThreadExecutor().execute(() ->
+                {
+                    try
+                    {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getActivity().getContentResolver(), uri);
+
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 64, baos);
+
+                        byte[] uploadArray = baos.toByteArray();
+                        Socket socket = new Socket(NetworkService.IP, Integer.parseInt(port));
+                        ObjectOutputStream output= new ObjectOutputStream(socket.getOutputStream());
+                        output.flush();
+                        output.writeUTF(imageid);
+                        output.flush();
+                        output.writeObject(uploadArray);
+                        output.flush();
+
+                        socket.close();
+                    }
+                    catch (IOException exception)
+                    {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+        });
+
+        photoResult.launch(uri);
     }
 
     private void sendMessage(String message)

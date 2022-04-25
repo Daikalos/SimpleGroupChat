@@ -224,7 +224,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         }
         else
         {
-            @SuppressLint("MissingPermission") ActivityResultLauncher<String> permissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
+            ActivityResultLauncher<String> locationPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
             {
                 if (result)
                 {
@@ -233,7 +233,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 }
             });
 
-            permissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            locationPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 

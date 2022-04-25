@@ -24,6 +24,8 @@ public class MainViewModel extends ViewModel
     private final ArrayList<Group> groups = new ArrayList<>();
     private final ArrayList<String> members = new ArrayList<>();
 
+    private LatLng location = new LatLng(Double.NaN, Double.NaN);
+
     public int getGroupsSize()
     {
         return joinedGroups.size();
@@ -47,6 +49,11 @@ public class MainViewModel extends ViewModel
     public ArrayList<String> getAllMembers()
     {
         return members;
+    }
+
+    public LatLng getLocation()
+    {
+        return location;
     }
 
     // --- EVENTS ---
@@ -96,6 +103,7 @@ public class MainViewModel extends ViewModel
 
     public void postLocation(Location location)
     {
+        this.location = new LatLng(location.getLatitude(), location.getLongitude());
         this.locationEvent.postValue(location);
     }
     public void postLocations(String groupName, Location[] locations)
