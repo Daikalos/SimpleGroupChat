@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
@@ -103,6 +104,8 @@ public class MainViewModel extends ViewModel
 
     public void postLocation(Location location)
     {
+        Log.d("error", location.getLatitude() + " : " + location.getLongitude());
+
         this.location = new LatLng(location.getLatitude(), location.getLongitude());
         this.locationEvent.postValue(location);
     }

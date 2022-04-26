@@ -4,10 +4,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,6 +40,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener
 {
@@ -51,9 +60,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private RecyclerView rvViewable;
     private ViewableAdapter viewableAdapter;
 
-    private HashMap<String, ArrayList<Marker>> mapMarkers; // group, markers
+    private ActivityResultLauncher<String[]> locationPermission;
+
+    private final HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
+    private HashMap<String, ArrayList<MarkerOptions>> mapMarkerOptions;
+
     private boolean languageSet = false;
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+    @SuppressLint("MissingPermission")
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -63,20 +79,32 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         if (savedInstanceState != null)
-            mapMarkers = (HashMap<String, ArrayList<Marker>>)savedInstanceState.getSerializable("Markers");
+            mapMarkerOptions = (HashMap<String, ArrayList<MarkerOptions>>)savedInstanceState.getSerializable("MarkerOptions");
         else
-            mapMarkers = new HashMap<>();
+            mapMarkerOptions = new HashMap<>();
+
+        locationPermission = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results ->
+        {
+            boolean fine = results.get(Manifest.permission.ACCESS_FINE_LOCATION);
+            boolean coarse = results.get(Manifest.permission.ACCESS_COARSE_LOCATION);
+
+            if (fine || coarse)
+                map.setMyLocationEnabled(true);
+
+            if (fine)
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+            else if (coarse)
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+        });
 
         String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
         languageSet = !currentLanguage.equals("en");
-
-        requestPermissions();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putSerializable("Markers", mapMarkers);
+        savedInstanceState.putSerializable("MarkerOptions", mapMarkerOptions);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -109,6 +137,27 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         map = googleMap;
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            map.setMyLocationEnabled(true);
+        }
+
+        requestPermissions();
+
+        for (String groupName : mapMarkerOptions.keySet())
+        {
+            ArrayList<MarkerOptions> markerOptions = mapMarkerOptions.get(groupName);
+            mapMarkers.put(groupName, new ArrayList<>(markerOptions.size()));
+
+            for (MarkerOptions mo : markerOptions)
+            {
+                Marker marker = map.addMarker(mo);
+                mapMarkers.get(groupName).add(marker);
+            }
+        }
+
         addObservers();
     }
 
@@ -160,9 +209,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
             if (group == null)
             {
-                if (mapMarkers.containsKey(groupName))
-                    clearMarkers(groupName);
-
+                clearMarkers(groupName);
                 return;
             }
 
@@ -186,11 +233,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         if (!mapMarkers.containsKey(groupName))
         {
-            ArrayList<Marker> markers = new ArrayList<>(locations.length);
-            mapMarkers.put(groupName, markers);
+            mapMarkers.put(groupName, new ArrayList<>(locations.length));
+            mapMarkerOptions.put(groupName, new ArrayList<>(locations.length));
         }
-        else
-            clearMarkers(groupName);
+
+        clearMarkers(groupName);
+        addImageMarkers();
 
         for (Location loc : locations)
         {
@@ -202,7 +250,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             if (Double.isNaN(longitude) || Double.isNaN(latitude))
                 continue;
 
-            markerOptions.position(new LatLng(longitude, latitude));
+            markerOptions.position(new LatLng(latitude, longitude));
             markerOptions.title(loc.getMember());
             markerOptions.snippet(loc.getMember() + " last recorded location");
 
@@ -210,19 +258,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             marker.setVisible(group.viewable);
 
             mapMarkers.get(groupName).add(marker);
+            mapMarkerOptions.get(groupName).add(markerOptions);
         }
     }
 
     @Override
     public void onLocationChanged(@NonNull android.location.Location location)
     {
+        if (mainActivity == null)
+            return;
+
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
 
         for (int i = 0; i < viewModel.getGroupsSize(); ++i)
         {
             Group group = viewModel.getGroup(i);
-            ((MainActivity)getActivity()).getController()
+            mainActivity.getController()
                     .sendMessage(JsonHelper.sendLocation(group.getId(), longitude, latitude));
         }
     }
@@ -236,33 +288,66 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private void requestPermissions()
     {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-        }
+        else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
         else
-        {
-            ActivityResultLauncher<String> locationPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
-            {
-                if (result)
-                {
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-                }
-            });
-
-            locationPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
+            locationPermission.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION });
     }
 
     private void clearMarkers(String groupName)
     {
-        ArrayList<Marker> markers = mapMarkers.get(groupName);
+        if (!mapMarkers.containsKey(groupName))
+            return;
 
-        for (Marker marker : markers)
+        for (Marker marker : mapMarkers.get(groupName))
             marker.remove();
 
-        markers.clear();
+        mapMarkers.get(groupName).clear();
+        mapMarkerOptions.get(groupName).clear();
+    }
+
+    private void addImageMarkers()
+    {
+        executorService.execute(() ->
+        {
+            for (int i = 0; i < viewModel.getGroupsSize(); ++i)
+            {
+                Group group = viewModel.getGroup(i);
+                for (TextMessage message : group.getMessages())
+                {
+                    if (message.getType() == TextMessage.TEXT_TYPE)
+                        continue;
+
+                    ImageMessage imageMessage = (ImageMessage)message;
+                    Bitmap bitmap = imageMessage.bitmap;
+
+                    if (bitmap == null)
+                        continue;
+
+                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 64, 64);
+
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(new LatLng(imageMessage.latitude, imageMessage.longitude));
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(thumbnail));
+                    markerOptions.anchor(0.5f, 1);
+
+                    mainActivity.runOnUiThread(() ->
+                    {
+                        Marker marker = map.addMarker(markerOptions);
+
+                        if (!mapMarkers.containsKey(message.groupName))
+                        {
+                            mapMarkers.put(message.groupName, new ArrayList<>());
+                            mapMarkerOptions.put(message.groupName, new ArrayList<>());
+                        }
+
+                        mapMarkers.get(message.groupName).add(marker);
+                        mapMarkerOptions.get(message.groupName).add(markerOptions);
+                    });
+                }
+            }
+        });
     }
 
     @Override

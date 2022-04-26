@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,10 +29,7 @@ public class ViewableAdapter extends RecyclerView.Adapter<ViewableAdapter.Viewab
     @Override
     public void onBindViewHolder(@NonNull ViewableHolder holder, int position)
     {
-        Group group = viewModel.getGroup(position);
-
-        holder.getGroupNameView().setText(group.getName());
-        holder.getViewableView().setChecked(group.viewable);
+        holder.bind(position);
     }
 
     @Override
@@ -46,6 +44,7 @@ public class ViewableAdapter extends RecyclerView.Adapter<ViewableAdapter.Viewab
         private final CheckBox cbViewable;
 
         private final MainViewModel viewModel;
+        private Group group;
 
         public ViewableHolder(@NonNull View itemView, MainViewModel viewModel)
         {
@@ -59,27 +58,21 @@ public class ViewableAdapter extends RecyclerView.Adapter<ViewableAdapter.Viewab
             itemView.setOnClickListener(this);
         }
 
-
         @Override
         public void onClick(View view)
         {
-            Group group = viewModel.getGroup(getAdapterPosition());
-            if (group != null)
-            {
-                group.viewable = !group.viewable;
-                cbViewable.setChecked(group.viewable);
+            group.viewable = !group.viewable;
+            cbViewable.setChecked(group.viewable);
 
-                viewModel.postViewable(group);
-            }
+            viewModel.postViewable(group);
         }
 
-        public TextView getGroupNameView()
+        public void bind(int position)
         {
-            return tvGroupName;
-        }
-        public CheckBox getViewableView()
-        {
-            return cbViewable;
+            group = viewModel.getGroup(position);
+
+            tvGroupName.setText(group.getName());
+            cbViewable.setChecked(group.viewable);
         }
     }
 }

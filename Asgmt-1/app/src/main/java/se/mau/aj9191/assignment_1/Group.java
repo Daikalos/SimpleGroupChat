@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Message;
 import android.os.Parcel;
@@ -9,6 +10,7 @@ import androidx.annotation.RequiresApi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Group implements Parcelable
 {
@@ -17,6 +19,8 @@ public class Group implements Parcelable
 
     private ArrayList<TextMessage> messages = new ArrayList<>();
     private ArrayList<String> members = new ArrayList<>();
+
+    private HashMap<String, ImageMessage> images = new HashMap<>();
 
     public Group(String id, String name)
     {
@@ -41,10 +45,6 @@ public class Group implements Parcelable
     {
         messages.add(message);
     }
-    public TextMessage getMessage(int pos)
-    {
-        return messages.get(pos);
-    }
     public int getMessagesSize()
     {
         return messages.size();
@@ -58,14 +58,10 @@ public class Group implements Parcelable
     {
         members.add(member);
     }
-    public void setMembers(ArrayList<String> members)
+
+    public void addImage(String id, Bitmap image)
     {
-        members.clear();
-        members.addAll(members);
-    }
-    public int getMembersSize()
-    {
-        return members.size();
+
     }
 
     public Group(Parcel in)

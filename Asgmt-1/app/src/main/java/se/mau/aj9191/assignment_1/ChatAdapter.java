@@ -38,9 +38,9 @@ public class ChatAdapter extends RecyclerView.Adapter
     private ArrayList<TextMessage> messages;
     private Context context;
 
-    public ChatAdapter(Context contxt, ArrayList<TextMessage> messages)
+    public ChatAdapter(Context context, ArrayList<TextMessage> messages)
     {
-        this.context = contxt;
+        this.context = context;
         this.messages = messages;
     }
 
@@ -127,13 +127,27 @@ public class ChatAdapter extends RecyclerView.Adapter
             if (imageLoaded)
                 showDescription();
             else
-                loadImage();
+            {
+                if (imageMessage.bitmap != null)
+                {
+                    ivImageChat.setImageBitmap(imageMessage.bitmap);
+                    imageLoaded = true;
+                }
+                else
+                    loadImage();
+            }
         }
 
         public void bind(ImageMessage imageMessage)
         {
             this.imageMessage = imageMessage;
             tvUsername.setText(imageMessage.username + ":");
+
+            if (imageMessage.bitmap != null)
+            {
+                ivImageChat.setImageBitmap(imageMessage.bitmap);
+                imageLoaded = true;
+            }
         }
 
         private void showDescription()
@@ -161,8 +175,8 @@ public class ChatAdapter extends RecyclerView.Adapter
             tvLatitude.setTextSize(18);
 
             tvMessage.setText(imageMessage.message);
-            tvLongitude.setText("Lng - " + imageMessage.longitude);
-            tvLatitude.setText("Lat - " + imageMessage.latitude);
+            tvLongitude.setText("Lng: " + imageMessage.longitude);
+            tvLatitude.setText("Lat: " + imageMessage.latitude);
 
             tvMessage.setGravity(Gravity.CENTER);
             tvLongitude.setGravity(Gravity.CENTER);
@@ -200,16 +214,22 @@ public class ChatAdapter extends RecyclerView.Adapter
                     byte[] downloadArray = (byte[])input.readObject();
                     socket.close();
 
+                    if (downloadArray.length == 0)
+                    {
+                        ((MainActivity)context).runOnUiThread(() ->
+                                Toast.makeText(context, "error loading image", Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inMutable = true;
 
                     Bitmap bitmap = BitmapFactory.decodeByteArray(downloadArray, 0, downloadArray.length, options);
 
                     ((MainActivity)context).runOnUiThread(() ->
-                    {
-                        ivImageChat.setImageBitmap(bitmap);
-                    });
+                            ivImageChat.setImageBitmap(bitmap));
 
+                    imageMessage.bitmap = bitmap;
                     imageLoaded = true;
                 }
                 catch (Exception e)

@@ -160,7 +160,7 @@ public class ChatFragment extends Fragment
         rvChat = view.findViewById(R.id.rvChat);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setReverseLayout(false);
         linearLayoutManager.setStackFromEnd(true);
 
         rvChat.setLayoutManager(linearLayoutManager);
@@ -219,14 +219,11 @@ public class ChatFragment extends Fragment
 
     private void sendTextMessage(String message)
     {
-        if (message.isEmpty())
+        if (message.isEmpty() || mainActivity == null)
             return;
 
-        if (mainActivity != null)
-        {
-            mainActivity.getController()
-                    .sendMessage(JsonHelper.sendEnterText(group.getId(), message));
-        }
+        mainActivity.getController()
+                .sendMessage(JsonHelper.sendEnterText(group.getId(), message));
     }
 
     private void takePicture()
@@ -312,7 +309,7 @@ public class ChatFragment extends Fragment
             if (mainActivity != null)
             {
                 mainActivity.getController()
-                        .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                        .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, viewModel.getLocation().longitude, viewModel.getLocation().latitude));
             }
 
         });

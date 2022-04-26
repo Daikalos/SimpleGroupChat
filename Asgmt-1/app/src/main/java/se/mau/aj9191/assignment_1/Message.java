@@ -1,5 +1,6 @@
 package se.mau.aj9191.assignment_1;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -95,6 +96,8 @@ class ImageMessage extends TextMessage implements Parcelable
     public double latitude;
     public String imageid;
     public String port;
+
+    public Bitmap bitmap;
 
     public ImageMessage(String groupName, String username, String message, double longitude, double latitude, String imageid, String port)
     {

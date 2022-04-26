@@ -41,7 +41,7 @@ public class NetworkService extends Service
 
     private final Object object = new Object();
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
