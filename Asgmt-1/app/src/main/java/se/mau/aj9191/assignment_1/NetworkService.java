@@ -207,7 +207,7 @@ public class NetworkService extends Service
                 dataOutputStream.writeUTF(jsonMessage);
                 dataOutputStream.flush();
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 Log.d("error", e.getMessage());
             }

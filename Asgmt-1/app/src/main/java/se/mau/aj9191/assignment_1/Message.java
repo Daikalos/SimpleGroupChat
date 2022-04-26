@@ -119,6 +119,7 @@ class ImageMessage extends TextMessage implements Parcelable
         latitude = in.readDouble();
         imageid = in.readString();
         port = in.readString();
+        bitmap = in.readParcelable(Bitmap.class.getClassLoader());
     }
     @Override
     public void writeToParcel(Parcel dest, int flags)
@@ -129,6 +130,7 @@ class ImageMessage extends TextMessage implements Parcelable
         dest.writeDouble(latitude);
         dest.writeString(imageid);
         dest.writeString(port);
+        dest.writeParcelable(bitmap, flags);
     }
     @Override
     public int describeContents()

@@ -12,6 +12,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,8 +47,8 @@ import java.util.concurrent.Executors;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener
 {
-    private static int UPDATE_INTERVAL = 30000;
-    private static int UPDATE_DISTANCE = 0;
+    private static final int UPDATE_INTERVAL = 30000;
+    private static final int UPDATE_DISTANCE = 0;
 
     private MainActivity mainActivity;
 
@@ -62,8 +64,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private ActivityResultLauncher<String[]> locationPermission;
 
-    private final HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
-    private HashMap<String, ArrayList<MarkerOptions>> mapMarkerOptions;
+    private HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
+    private HashMap<String, ArrayList<MarkerContents>> mapMarkerContents;
 
     private boolean languageSet = false;
 
@@ -79,9 +81,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         if (savedInstanceState != null)
-            mapMarkerOptions = (HashMap<String, ArrayList<MarkerOptions>>)savedInstanceState.getSerializable("MarkerOptions");
+            mapMarkerContents = (HashMap<String, ArrayList<MarkerContents>>)savedInstanceState.getSerializable("MarkerContents");
         else
-            mapMarkerOptions = new HashMap<>();
+            mapMarkerContents = new HashMap<>();
 
         locationPermission = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results ->
         {
@@ -104,7 +106,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putSerializable("MarkerOptions", mapMarkerOptions);
+        savedInstanceState.putSerializable("MarkerContents", mapMarkerContents);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -129,6 +131,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         initializeComponents(view, savedInstanceState);
         registerListeners();
+        addObservers();
 
         return view;
     }
@@ -138,27 +141,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     {
         map = googleMap;
 
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            map.setMyLocationEnabled(true);
-        }
-
         requestPermissions();
 
-        for (String groupName : mapMarkerOptions.keySet())
+        for (String groupName : mapMarkerContents.keySet()) // add back all markers
         {
-            ArrayList<MarkerOptions> markerOptions = mapMarkerOptions.get(groupName);
+            ArrayList<MarkerContents> markerOptions = mapMarkerContents.get(groupName);
             mapMarkers.put(groupName, new ArrayList<>(markerOptions.size()));
 
-            for (MarkerOptions mo : markerOptions)
+            for (MarkerContents mo : markerOptions)
             {
-                Marker marker = map.addMarker(mo);
+                Marker marker = map.addMarker(mo.getMarkerOptions());
+                marker.setTag(mo.imageMessage);
+
                 mapMarkers.get(groupName).add(marker);
             }
         }
-
-        addObservers();
     }
 
     private void initializeComponents(View view, Bundle savedInstanceState)
@@ -234,7 +231,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         if (!mapMarkers.containsKey(groupName))
         {
             mapMarkers.put(groupName, new ArrayList<>(locations.length));
-            mapMarkerOptions.put(groupName, new ArrayList<>(locations.length));
+            mapMarkerContents.put(groupName, new ArrayList<>(locations.length));
         }
 
         clearMarkers(groupName);
@@ -242,23 +239,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         for (Location loc : locations)
         {
-            MarkerOptions markerOptions = new MarkerOptions();
-
             double longitude = loc.getLongitude();
             double latitude = loc.getLatitude();
 
             if (Double.isNaN(longitude) || Double.isNaN(latitude))
                 continue;
 
-            markerOptions.position(new LatLng(latitude, longitude));
-            markerOptions.title(loc.getMember());
-            markerOptions.snippet(loc.getMember() + " last recorded location");
+            MarkerContents markerContents = new MarkerContents();
+            markerContents.latitude = latitude;
+            markerContents.longitude = longitude;
+            markerContents.title = loc.getMember();
+            markerContents.snippet = loc.getMember() + " last recorded location";
+            markerContents.visible = group.viewable;
 
-            Marker marker = map.addMarker(markerOptions);
-            marker.setVisible(group.viewable);
+            Marker marker = map.addMarker(markerContents.getMarkerOptions());
 
             mapMarkers.get(groupName).add(marker);
-            mapMarkerOptions.get(groupName).add(markerOptions);
+            mapMarkerContents.get(groupName).add(markerContents);
         }
     }
 
@@ -282,11 +279,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public boolean onMarkerClick(@NonNull Marker marker)
     {
-        return false;
+        ImageMessage imageMessage = (ImageMessage)marker.getTag();
+
+        if (imageMessage == null)
+            return false;
+
+
+
+        return true;
     }
 
     private void requestPermissions()
     {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            map.setMyLocationEnabled(true);
+        }
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
         else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -304,7 +314,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             marker.remove();
 
         mapMarkers.get(groupName).clear();
-        mapMarkerOptions.get(groupName).clear();
+        mapMarkerContents.get(groupName).clear();
     }
 
     private void addImageMarkers()
@@ -327,23 +337,27 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
                     Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 64, 64);
 
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(new LatLng(imageMessage.latitude, imageMessage.longitude));
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(thumbnail));
-                    markerOptions.anchor(0.5f, 1);
+                    MarkerContents markerContents = new MarkerContents();
+                    markerContents.latitude = imageMessage.latitude;
+                    markerContents.longitude = imageMessage.longitude;
+                    markerContents.icon = thumbnail;
+                    markerContents.anchorX = 0.5f;
+                    markerContents.anchorY = 1.0f;
+                    markerContents.imageMessage = imageMessage;
 
                     mainActivity.runOnUiThread(() ->
                     {
-                        Marker marker = map.addMarker(markerOptions);
+                        Marker marker = map.addMarker(markerContents.getMarkerOptions());
+                        marker.setTag(markerContents.imageMessage);
 
                         if (!mapMarkers.containsKey(message.groupName))
                         {
                             mapMarkers.put(message.groupName, new ArrayList<>());
-                            mapMarkerOptions.put(message.groupName, new ArrayList<>());
+                            mapMarkerContents.put(message.groupName, new ArrayList<>());
                         }
 
                         mapMarkers.get(message.groupName).add(marker);
-                        mapMarkerOptions.get(message.groupName).add(markerOptions);
+                        mapMarkerContents.get(message.groupName).add(markerContents);
                     });
                 }
             }
@@ -404,4 +418,90 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             mapView.onLowMemory();
     }
 
+    private static class MarkerContents implements Parcelable
+    {
+        public double latitude = Double.NaN;
+        public double longitude = Double.NaN;
+        public String title = null;
+        public String snippet = null;
+        public float anchorX = Float.NaN;
+        public float anchorY = Float.NaN;
+        public boolean visible = true;
+        public Bitmap icon = null;
+
+        public ImageMessage imageMessage = null;
+
+        public MarkerContents()
+        {
+
+        }
+
+        protected MarkerContents(Parcel in)
+        {
+            latitude = in.readDouble();
+            longitude = in.readDouble();
+            title = in.readString();
+            snippet = in.readString();
+            anchorX = in.readFloat();
+            anchorY = in.readFloat();
+            visible = in.readInt() != 0;
+            icon = in.readParcelable(Bitmap.class.getClassLoader());
+            imageMessage = in.readParcelable(ImageMessage.class.getClassLoader());
+        }
+
+        public MarkerOptions getMarkerOptions()
+        {
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            if (!Double.isNaN(latitude) && !Double.isNaN(longitude))
+                markerOptions.position(new LatLng(latitude, longitude));
+            if (title != null)
+                markerOptions.title(title);
+            if (snippet != null)
+                markerOptions.snippet(snippet);
+            if (!Float.isNaN(anchorX) && !Float.isNaN(anchorY))
+                markerOptions.anchor(anchorX, anchorY);
+            if (icon != null)
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon));
+
+            markerOptions.visible(visible);
+
+            return markerOptions;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i)
+        {
+            parcel.writeDouble(latitude);
+            parcel.writeDouble(longitude);
+            parcel.writeString(title);
+            parcel.writeString(snippet);
+            parcel.writeFloat(anchorX);
+            parcel.writeFloat(anchorY);
+            parcel.writeInt(visible ? 1 : 0);
+            parcel.writeParcelable(icon, i);
+            parcel.writeParcelable(imageMessage, i);
+        }
+
+        @Override
+        public int describeContents()
+        {
+            return 0;
+        }
+
+        public static final Creator<MarkerContents> CREATOR = new Creator<MarkerContents>()
+        {
+            @Override
+            public MarkerContents createFromParcel(Parcel in)
+            {
+                return new MarkerContents(in);
+            }
+
+            @Override
+            public MarkerContents[] newArray(int size)
+            {
+                return new MarkerContents[size];
+            }
+        };
+    }
 }

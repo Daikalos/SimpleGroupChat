@@ -69,8 +69,8 @@ public class Group implements Parcelable
         id = in.readString();
         name = in.readString();
         viewable = in.readInt() != 0;
-        messages = in.readArrayList(null);
-        members = in.readArrayList(null);
+        messages = in.readArrayList(TextMessage.class.getClassLoader());
+        members = in.readArrayList(String.class.getClassLoader());
     }
     @Override
     public void writeToParcel(Parcel parcel, int i)
