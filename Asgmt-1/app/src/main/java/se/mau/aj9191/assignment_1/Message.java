@@ -47,6 +47,11 @@ class TextMessage implements Parcelable
         type = TEXT_TYPE;
     }
 
+    public int getType()
+    {
+        return type;
+    }
+
     public TextMessage(Parcel in)
     {
         groupName = in.readString();
@@ -82,14 +87,9 @@ class TextMessage implements Parcelable
             return new TextMessage[size];
         }
     };
-
-    public int getType()
-    {
-        return type;
-    }
 }
 
-class ImageMessage extends TextMessage
+class ImageMessage extends TextMessage implements Parcelable
 {
     public double longitude;
     public double latitude;
@@ -108,7 +108,7 @@ class ImageMessage extends TextMessage
         type = IMAGE_TYPE;
     }
 
-    protected ImageMessage(Parcel in)
+    public ImageMessage(Parcel in)
     {
         super(in);
 
@@ -117,7 +117,6 @@ class ImageMessage extends TextMessage
         imageid = in.readString();
         port = in.readString();
     }
-
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {

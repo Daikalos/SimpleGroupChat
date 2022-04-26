@@ -183,7 +183,7 @@ public class JsonHelper
 
         ImageMessage result = new ImageMessage(group, member, text, longitude, latitude, imageid, port);
 
-        viewModel.postTextMessage(result);
+        viewModel.postImageMessage(result);
     }
     public static void parseException(JSONObject jsonObject) throws JSONException
     {

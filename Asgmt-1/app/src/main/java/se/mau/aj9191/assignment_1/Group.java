@@ -1,11 +1,16 @@
 package se.mau.aj9191.assignment_1;
 
+import android.os.Build;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Group implements Serializable
+public class Group implements Parcelable
 {
     public String id, name;
     public boolean viewable = true;
@@ -62,4 +67,42 @@ public class Group implements Serializable
     {
         return members.size();
     }
+
+    public Group(Parcel in)
+    {
+        id = in.readString();
+        name = in.readString();
+        viewable = in.readInt() != 0;
+        messages = in.readArrayList(null);
+        members = in.readArrayList(null);
+    }
+    @Override
+    public void writeToParcel(Parcel parcel, int i)
+    {
+        parcel.writeString(id);
+        parcel.writeString(name);
+        parcel.writeInt(viewable ? 1 : 0);
+        parcel.writeList(messages);
+        parcel.writeList(members);
+    }
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    public static final Creator<Group> CREATOR = new Creator<Group>()
+    {
+        @Override
+        public Group createFromParcel(Parcel in)
+        {
+            return new Group(in);
+        }
+
+        @Override
+        public Group[] newArray(int size)
+        {
+            return new Group[size];
+        }
+    };
 }

@@ -64,11 +64,13 @@ public class ViewableAdapter extends RecyclerView.Adapter<ViewableAdapter.Viewab
         public void onClick(View view)
         {
             Group group = viewModel.getGroup(getAdapterPosition());
+            if (group != null)
+            {
+                group.viewable = !group.viewable;
+                cbViewable.setChecked(group.viewable);
 
-            group.viewable = !group.viewable;
-            cbViewable.setChecked(group.viewable);
-
-            viewModel.postViewable(group);
+                viewModel.postViewable(group);
+            }
         }
 
         public TextView getGroupNameView()

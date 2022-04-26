@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -123,7 +124,7 @@ public class ChatAdapter extends RecyclerView.Adapter
         @Override
         public void onClick(View view)
         {
-            if (!imageLoaded)
+            if (imageLoaded)
                 showDescription();
             else
                 loadImage();
@@ -141,21 +142,33 @@ public class ChatAdapter extends RecyclerView.Adapter
 
             LinearLayout layout = new LinearLayout(context);
             layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(32, 32, 32, 32);
+            layout.setPadding(0, 32, 0, 0);
+            layout.setLayoutParams(new LinearLayout.LayoutParams(
+                    280, LinearLayout.LayoutParams.WRAP_CONTENT));
 
             TextView tvMessage = new TextView(context);
             TextView tvLongitude = new TextView(context);
             TextView tvLatitude = new TextView(context);
+
+            int color = ContextCompat.getColor(context, R.color.black);
+
+            tvMessage.setTextColor(color);
+            tvLongitude.setTextColor(color);
+            tvLatitude.setTextColor(color);
+
+            tvMessage.setTextSize(28);
+            tvLongitude.setTextSize(18);
+            tvLatitude.setTextSize(18);
+
+            tvMessage.setText(imageMessage.message);
+            tvLongitude.setText("Lng - " + imageMessage.longitude);
+            tvLatitude.setText("Lat - " + imageMessage.latitude);
 
             tvMessage.setGravity(Gravity.CENTER);
             tvLongitude.setGravity(Gravity.CENTER);
             tvLatitude.setGravity(Gravity.CENTER);
 
             tvMessage.setPadding(0, 0, 0, 16);
-
-            tvMessage.setText(imageMessage.message);
-            tvLongitude.setText("Lng - " + imageMessage.longitude);
-            tvLatitude.setText("Lat - " + imageMessage.latitude);
 
             builder.setPositiveButton("OK", null);
 
@@ -174,7 +187,11 @@ public class ChatAdapter extends RecyclerView.Adapter
             {
                 try
                 {
-                    Socket socket = new Socket(InetAddress.getByName(NetworkService.IP), Integer.parseInt(imageMessage.port));
+                    InetSocketAddress inetSocketAddress = new InetSocketAddress(NetworkService.IP, Integer.parseInt(imageMessage.port));
+
+                    Socket socket = new Socket();
+                    socket.connect(inetSocketAddress, 5000);
+
                     ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                     output.flush();
@@ -195,9 +212,10 @@ public class ChatAdapter extends RecyclerView.Adapter
 
                     imageLoaded = true;
                 }
-                catch (IOException | ClassNotFoundException e)
+                catch (Exception e)
                 {
                     e.printStackTrace();
+                    Toast.makeText(context, "Picture no longer available", Toast.LENGTH_SHORT).show();
                 }
             });
         }

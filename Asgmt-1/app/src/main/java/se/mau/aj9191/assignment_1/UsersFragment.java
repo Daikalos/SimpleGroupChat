@@ -1,6 +1,7 @@
 package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -14,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -29,6 +31,7 @@ import java.util.Arrays;
 
 public class UsersFragment extends Fragment
 {
+    private MainActivity mainActivity;
     private MainViewModel viewModel;
 
     private TextView tvGroupName;
@@ -67,8 +70,11 @@ public class UsersFragment extends Fragment
 
         group = viewModel.getGroup(groupName);
 
-        ((MainActivity)getActivity()).getController()
-                .sendMessage(JsonHelper.sendGetMembers(groupName));
+        if (mainActivity != null)
+        {
+            mainActivity.getController()
+                    .sendMessage(JsonHelper.sendGetMembers(groupName));
+        }
     }
 
     @Override
@@ -76,6 +82,20 @@ public class UsersFragment extends Fragment
     {
         savedInstanceState.putString("GroupName", groupName);
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context)
+    {
+        super.onAttach(context);
+        mainActivity = (MainActivity)context;
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        mainActivity = null;
     }
 
     @Override
@@ -145,8 +165,11 @@ public class UsersFragment extends Fragment
                 this.group = group;
 
                 enableControls();
-                ((MainActivity)getActivity()).getController()
-                        .sendMessage(JsonHelper.sendGetMembers(groupName));
+                if (mainActivity != null)
+                {
+                    mainActivity.getController()
+                            .sendMessage(JsonHelper.sendGetMembers(groupName));
+                }
             }
         });
 
@@ -155,8 +178,11 @@ public class UsersFragment extends Fragment
             if (group != null && id.equals(group.getId()))
             {
                 disableControls();
-                ((MainActivity)getActivity()).getController()
-                        .sendMessage(JsonHelper.sendGetMembers(groupName));
+                if (mainActivity != null)
+                {
+                    mainActivity.getController()
+                            .sendMessage(JsonHelper.sendGetMembers(groupName));
+                }
             }
         });
 
@@ -187,8 +213,11 @@ public class UsersFragment extends Fragment
                 return;
             }
 
-            ((MainActivity)getActivity()).getController()
-                    .sendMessage(JsonHelper.sendRegister(groupName, username));
+            if (mainActivity != null)
+            {
+                mainActivity.getController()
+                        .sendMessage(JsonHelper.sendRegister(groupName, username));
+            }
         });
         builder.setNegativeButton("Cancel", null);
 
@@ -202,8 +231,11 @@ public class UsersFragment extends Fragment
     }
     private void leaveGroup()
     {
-        ((MainActivity)getActivity()).getController()
-                .sendMessage(JsonHelper.sendUnregister(group.getId()));
+        if (mainActivity != null)
+        {
+            mainActivity.getController()
+                    .sendMessage(JsonHelper.sendUnregister(group.getId()));
+        }
     }
 
     private void disableControls()

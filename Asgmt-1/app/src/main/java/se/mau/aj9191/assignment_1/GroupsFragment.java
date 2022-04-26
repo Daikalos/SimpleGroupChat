@@ -1,6 +1,7 @@
 package se.mau.aj9191.assignment_1;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 
 public class GroupsFragment extends Fragment
 {
+    private MainActivity mainActivity;
     private MainViewModel viewModel;
 
     private ImageButton btnBack;
@@ -38,6 +41,20 @@ public class GroupsFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context)
+    {
+        super.onAttach(context);
+        mainActivity = (MainActivity)context;
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        mainActivity = null;
     }
 
     @Override
@@ -56,8 +73,12 @@ public class GroupsFragment extends Fragment
     public void onResume()
     {
         super.onResume();;
-        ((MainActivity)getActivity()).getController()
-                .sendMessage(JsonHelper.sendGetGroups());
+
+        if (mainActivity != null)
+        {
+            mainActivity.getController()
+                    .sendMessage(JsonHelper.sendGetGroups());
+        }
     }
 
     private void initializeComponents(View view)
@@ -103,12 +124,15 @@ public class GroupsFragment extends Fragment
                     return;
                 }
 
-                ((MainActivity)getActivity()).getController()
-                        .sendMessage(JsonHelper.sendRegister(groupName, username));
+                if (mainActivity != null)
+                {
+                    mainActivity.getController()
+                            .sendMessage(JsonHelper.sendRegister(groupName, username));
 
-                ((AppCompatActivity)view.getContext()).getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fcvMain, new UsersFragment(groupName))
-                        .addToBackStack(null).commit();
+                    ((AppCompatActivity) view.getContext()).getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fcvMain, new UsersFragment(groupName))
+                            .addToBackStack(null).commit();
+                }
             });
             builder.setNegativeButton("Cancel", null);
 

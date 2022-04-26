@@ -34,9 +34,12 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener
+{
     private static int UPDATE_INTERVAL = 30000;
     private static int UPDATE_DISTANCE = 0;
+
+    private MainActivity mainActivity;
 
     private LocationManager locationManager;
     private MainViewModel viewModel;
@@ -66,6 +69,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
         languageSet = !currentLanguage.equals("en");
+
+        requestPermissions();
     }
 
     @Override
@@ -76,14 +81,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     }
 
     @Override
+    public void onAttach(@NonNull Context context)
+    {
+        super.onAttach(context);
+        mainActivity = (MainActivity)context;
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        mainActivity = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
         initializeComponents(view, savedInstanceState);
         registerListeners();
-
-        requestPermissions();
 
         return view;
     }
