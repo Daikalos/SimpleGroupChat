@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().popBackStack();
     }
 
+    @NonNull
     public Controller getController()
     {
         return controller;

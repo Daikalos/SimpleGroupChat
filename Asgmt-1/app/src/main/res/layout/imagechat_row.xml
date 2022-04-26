@@ -31,12 +31,13 @@
 
         <ImageView
             android:id="@+id/ivImageChat"
-            android:layout_width="248dp"
+            android:layout_width="256dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:contentDescription="@string/desc_uploadedImage"
-            app:srcCompat="@android:drawable/ic_delete" />
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/download" />
 
     </LinearLayout>
 

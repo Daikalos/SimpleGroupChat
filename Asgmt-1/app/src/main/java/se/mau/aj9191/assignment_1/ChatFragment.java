@@ -1,6 +1,7 @@
 package se.mau.aj9191.assignment_1;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.LocationManager;
@@ -18,7 +19,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -27,6 +30,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -41,6 +45,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -112,7 +117,7 @@ public class ChatFragment extends Fragment
         linearLayoutManager.setStackFromEnd(true);
 
         rvChat.setLayoutManager(linearLayoutManager);
-        rvChat.setAdapter(chatAdapter = new ChatAdapter(group.getMessages()));
+        rvChat.setAdapter(chatAdapter = new ChatAdapter(getActivity(), group.getMessages()));
         rvChat.addItemDecoration(new DividerItemDecoration(rvChat.getContext(), DividerItemDecoration.VERTICAL));
 
         tvGroupName.setText(group.getName());
@@ -138,22 +143,53 @@ public class ChatFragment extends Fragment
 
         btnUpload.setOnClickListener(view ->
         {
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
-            {
-                ((MainActivity)getActivity()).getController()
-                        .sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
-            }
-            else
-            {
-                ActivityResultLauncher<String> photoPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
-                {
-                    if (result)
-                        ((MainActivity)getActivity()).getController()
-                                .sendMessage(JsonHelper.sendEnterImage(group.getId(), "", viewModel.getLocation().longitude, viewModel.getLocation().longitude));
-                });
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
-                photoPermissionResult.launch(Manifest.permission.CAMERA);
-            }
+            LinearLayout layout = new LinearLayout(requireContext());
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(32, 32, 32, 32);
+
+            EditText edGroup = new EditText(getContext());
+            edGroup.setHint("enter a message for the image");
+
+            builder.setPositiveButton("OK", (dialogInterface, i) ->
+            {
+                String message = edGroup.getText().toString();
+
+                if (message.isEmpty())
+                {
+                    Toast.makeText(requireContext(), "empty string", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+                {
+                    ((MainActivity)getActivity()).getController()
+                            .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                }
+                else
+                {
+                    ActivityResultLauncher<String> photoPermissionResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result ->
+                    {
+                        if (result)
+                        {
+                            ((MainActivity) getActivity()).getController()
+                                    .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, viewModel.getLocation().longitude, viewModel.getLocation().longitude));
+                        }
+                    });
+
+                    photoPermissionResult.launch(Manifest.permission.CAMERA);
+                }
+            });
+            builder.setNegativeButton("Cancel", null);
+
+            layout.addView(edGroup);
+
+            AlertDialog dialog = builder.create();
+            dialog.setTitle("Image Message");
+            dialog.setView(layout);
+
+            dialog.show();
         });
     }
 
@@ -201,7 +237,7 @@ public class ChatFragment extends Fragment
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 64, baos);
 
                         byte[] uploadArray = baos.toByteArray();
-                        Socket socket = new Socket(NetworkService.IP, Integer.parseInt(port));
+                        Socket socket = new Socket(InetAddress.getByName(NetworkService.IP), Integer.parseInt(port));
                         ObjectOutputStream output= new ObjectOutputStream(socket.getOutputStream());
                         output.flush();
                         output.writeUTF(imageid);

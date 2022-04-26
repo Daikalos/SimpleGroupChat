@@ -27,7 +27,7 @@ public class Controller
 
         if (savedInstanceState == null)
             mainActivity.startService(intent);
-        mainActivity.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        mainActivity.bindService(intent, serviceConnection, 0);
     }
 
     public void onDestroy()
@@ -35,7 +35,9 @@ public class Controller
         if (bound)
         {
             mainActivity.unbindService(serviceConnection);
-            listener.shutdown();;
+            listener.shutdown();
+
+            bound = false;
         }
     }
 
