@@ -149,12 +149,12 @@ public class ChatFragment extends Fragment
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setPadding(32, 32, 32, 32);
 
-            EditText edGroup = new EditText(getContext());
-            edGroup.setHint("enter a message for the image");
+            EditText edMessage = new EditText(getContext());
+            edMessage.setHint("enter a message for the image");
 
             builder.setPositiveButton("OK", (dialogInterface, i) ->
             {
-                String message = edGroup.getText().toString();
+                String message = edMessage.getText().toString();
 
                 if (message.isEmpty())
                 {
@@ -183,7 +183,7 @@ public class ChatFragment extends Fragment
             });
             builder.setNegativeButton("Cancel", null);
 
-            layout.addView(edGroup);
+            layout.addView(edMessage);
 
             AlertDialog dialog = builder.create();
             dialog.setTitle("Image Message");
