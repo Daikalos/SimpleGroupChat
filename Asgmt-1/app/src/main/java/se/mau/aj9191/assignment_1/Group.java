@@ -20,6 +20,8 @@ public class Group implements Parcelable
     private ArrayList<TextMessage> messages = new ArrayList<>();
     private ArrayList<String> members = new ArrayList<>();
 
+    private ArrayList<NormalMarker> markers = new ArrayList<>();
+
     public Group(String id, String name)
     {
         this.id = id;
@@ -57,6 +59,19 @@ public class Group implements Parcelable
         members.add(member);
     }
 
+    public ArrayList<NormalMarker> getMarkers()
+    {
+        return markers;
+    }
+    public void addMarker(NormalMarker marker)
+    {
+        markers.add(marker);
+    }
+    public void removeMarker(int i)
+    {
+        markers.remove(i);
+    }
+
     public Group(Parcel in)
     {
         id = in.readString();
@@ -64,6 +79,7 @@ public class Group implements Parcelable
         viewable = in.readInt() != 0;
         messages = in.readArrayList(TextMessage.class.getClassLoader());
         members = in.readArrayList(String.class.getClassLoader());
+        markers = in.readArrayList(NormalMarker.class.getClassLoader());
     }
     @Override
     public void writeToParcel(Parcel parcel, int i)
@@ -73,6 +89,7 @@ public class Group implements Parcelable
         parcel.writeInt(viewable ? 1 : 0);
         parcel.writeList(messages);
         parcel.writeList(members);
+        parcel.writeList(markers);
     }
     @Override
     public int describeContents()

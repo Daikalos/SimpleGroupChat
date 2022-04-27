@@ -17,6 +17,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +70,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private ActivityResultLauncher<String[]> locationPermission;
 
     private HashMap<String, ArrayList<Marker>> mapMarkers = new HashMap<>(); // group, markers
-    private HashMap<String, ArrayList<MarkerContents>> mapMarkerContents;
 
     private boolean languageSet = false;
 
@@ -81,11 +81,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
-        if (savedInstanceState != null)
-            mapMarkerContents = (HashMap<String, ArrayList<MarkerContents>>)savedInstanceState.getSerializable("MarkerContents");
-        else
-            mapMarkerContents = new HashMap<>();
 
         locationPermission = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results ->
         {
@@ -103,13 +98,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         String currentLanguage = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(LocaleHelper.SELECTED_LANGUAGE, "en");
         languageSet = !currentLanguage.equals("en");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        savedInstanceState.putSerializable("MarkerContents", mapMarkerContents);
-        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -189,19 +177,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private void addObservers()
     {
-        viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupLocations ->
-        {
-            String groupName = groupLocations.first;
-            Group group = viewModel.getGroup(groupName);
+        viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), this::showMarkers);
 
-            if (group == null)
-            {
-                clearMarkers(groupName);
-                return;
-            }
-
-            showUsers(group, groupLocations.second);
-        });
         viewModel.getViewableLiveData().observe(getViewLifecycleOwner(), group ->
         {
             String groupName = group.getName();
@@ -214,38 +191,34 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         });
     }
 
-    private void showUsers(Group group, Location[] locations)
+    private void showMarkers(String groupName)
     {
-        String groupName = group.getName();
+        clearMarkers(groupName);
+
+        Group group = viewModel.getGroup(groupName);
+
+        if (group == null)
+            return;
+
+        ArrayList<NormalMarker> markers = group.getMarkers();
 
         if (!mapMarkers.containsKey(groupName))
-        {
-            mapMarkers.put(groupName, new ArrayList<>(locations.length));
-            mapMarkerContents.put(groupName, new ArrayList<>(locations.length));
-        }
+            mapMarkers.put(groupName, new ArrayList<>(markers.size()));
 
-        clearMarkers(groupName);
-        addImageMarkers();
-
-        for (Location loc : locations)
+        for (NormalMarker normalMarker : markers)
         {
-            double longitude = loc.getLongitude();
-            double latitude = loc.getLatitude();
+            double longitude = normalMarker.longitude;
+            double latitude = normalMarker.latitude;
 
             if (Double.isNaN(longitude) || Double.isNaN(latitude))
                 continue;
 
-            MarkerContents markerContents = new MarkerContents();
-            markerContents.latitude = latitude;
-            markerContents.longitude = longitude;
-            markerContents.title = loc.getMember();
-            markerContents.snippet = loc.getMember() + " last recorded location";
-            markerContents.visible = group.viewable;
+            Marker marker = map.addMarker(normalMarker.getMarkerOptions());
 
-            Marker marker = map.addMarker(markerContents.getMarkerOptions());
+            if (normalMarker.getType() == NormalMarker.IMAGE_MARKER)
+                marker.setTag(((ImageMarker)normalMarker).imageMessage);
 
             mapMarkers.get(groupName).add(marker);
-            mapMarkerContents.get(groupName).add(markerContents);
         }
     }
 
@@ -280,7 +253,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(8, 8, 8, 8);
         layout.setLayoutParams(new LinearLayout.LayoutParams(
-                280, LinearLayout.LayoutParams.WRAP_CONTENT));
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         ImageView ivPicture = new ImageView(getContext());
         TextView tvDesc = new TextView(getContext());
@@ -292,6 +266,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         tvDesc.setTextColor(color);
         tvDesc.setTextSize(24);
+        tvDesc.setGravity(Gravity.CENTER);
 
         ivPicture.setImageBitmap(imageMessage.bitmap);
         tvDesc.setText(imageMessage.message);
@@ -311,17 +286,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private void loadMarkers()
     {
-        for (String groupName : mapMarkerContents.keySet()) // add back all markers on rotation
+        for (int i = 0; i < viewModel.getGroupsSize(); ++i)
         {
-            ArrayList<MarkerContents> markerOptions = mapMarkerContents.get(groupName);
-            mapMarkers.put(groupName, new ArrayList<>(markerOptions.size()));
+            Group group = viewModel.getGroup(i);
 
-            for (MarkerContents mo : markerOptions)
+            ArrayList<NormalMarker> markerOptions = group.getMarkers();
+            mapMarkers.put(group.getName(), new ArrayList<>(markerOptions.size()));
+
+            for (NormalMarker normalMarker : markerOptions)
             {
-                Marker marker = map.addMarker(mo.getMarkerOptions());
-                marker.setTag(mo.imageMessage);
+                Marker marker = map.addMarker(normalMarker.getMarkerOptions());
 
-                mapMarkers.get(groupName).add(marker);
+                if (normalMarker.getType() == NormalMarker.IMAGE_MARKER)
+                    marker.setTag(((ImageMarker)normalMarker).imageMessage);
+
+                mapMarkers.get(group.getName()).add(marker);
             }
         }
     }
@@ -335,49 +314,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             marker.remove();
 
         mapMarkers.get(groupName).clear();
-        mapMarkerContents.get(groupName).clear();
-    }
-
-    private void addImageMarkers()
-    {
-        for (int i = 0; i < viewModel.getGroupsSize(); ++i)
-        {
-            Group group = viewModel.getGroup(i);
-            for (TextMessage message : group.getMessages())
-            {
-                if (message.getType() != TextMessage.IMAGE_TYPE)
-                    continue;
-
-                ImageMessage imageMessage = (ImageMessage)message;
-                Bitmap bitmap = imageMessage.bitmap;
-
-                if (bitmap == null)
-                    continue;
-
-                Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 64, 64);
-
-                MarkerContents markerContents = new MarkerContents();
-                markerContents.latitude = imageMessage.latitude;
-                markerContents.longitude = imageMessage.longitude;
-                markerContents.title = imageMessage.username;
-                markerContents.icon = thumbnail;
-                markerContents.anchorX = 0.5f;
-                markerContents.anchorY = 1.0f;
-                markerContents.imageMessage = imageMessage;
-
-                Marker marker = map.addMarker(markerContents.getMarkerOptions());
-                marker.setTag(markerContents.imageMessage);
-
-                if (!mapMarkers.containsKey(message.groupName))
-                {
-                    mapMarkers.put(message.groupName, new ArrayList<>());
-                    mapMarkerContents.put(message.groupName, new ArrayList<>());
-                }
-
-                mapMarkers.get(message.groupName).add(marker);
-                mapMarkerContents.get(message.groupName).add(markerContents);
-            }
-        }
     }
 
     private void requestPermissions()
@@ -448,92 +384,5 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         if (mapView != null)
             mapView.onLowMemory();
-    }
-
-    private static class MarkerContents implements Parcelable
-    {
-        public double latitude = Double.NaN;
-        public double longitude = Double.NaN;
-        public String title = null;
-        public String snippet = null;
-        public float anchorX = Float.NaN;
-        public float anchorY = Float.NaN;
-        public boolean visible = true;
-        public Bitmap icon = null;
-
-        public ImageMessage imageMessage = null;
-
-        public MarkerContents()
-        {
-
-        }
-
-        public MarkerOptions getMarkerOptions()
-        {
-            MarkerOptions markerOptions = new MarkerOptions();
-
-            if (!Double.isNaN(latitude) && !Double.isNaN(longitude))
-                markerOptions.position(new LatLng(latitude, longitude));
-            if (title != null)
-                markerOptions.title(title);
-            if (snippet != null)
-                markerOptions.snippet(snippet);
-            if (!Float.isNaN(anchorX) && !Float.isNaN(anchorY))
-                markerOptions.anchor(anchorX, anchorY);
-            if (icon != null)
-                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon));
-
-            markerOptions.visible(visible);
-
-            return markerOptions;
-        }
-
-        protected MarkerContents(Parcel in)
-        {
-            latitude = in.readDouble();
-            longitude = in.readDouble();
-            title = in.readString();
-            snippet = in.readString();
-            anchorX = in.readFloat();
-            anchorY = in.readFloat();
-            visible = in.readInt() != 0;
-            icon = in.readParcelable(Bitmap.class.getClassLoader());
-            imageMessage = in.readParcelable(ImageMessage.class.getClassLoader());
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i)
-        {
-            parcel.writeDouble(latitude);
-            parcel.writeDouble(longitude);
-            parcel.writeString(title);
-            parcel.writeString(snippet);
-            parcel.writeFloat(anchorX);
-            parcel.writeFloat(anchorY);
-            parcel.writeInt(visible ? 1 : 0);
-            parcel.writeParcelable(icon, i);
-            parcel.writeParcelable(imageMessage, i);
-        }
-
-        @Override
-        public int describeContents()
-        {
-            return 0;
-        }
-
-        public static final Creator<MarkerContents> CREATOR = new Creator<MarkerContents>()
-        {
-            @Override
-            public MarkerContents createFromParcel(Parcel in)
-            {
-                return new MarkerContents(in);
-            }
-
-            @Override
-            public MarkerContents[] newArray(int size)
-            {
-                return new MarkerContents[size];
-            }
-        };
     }
 }

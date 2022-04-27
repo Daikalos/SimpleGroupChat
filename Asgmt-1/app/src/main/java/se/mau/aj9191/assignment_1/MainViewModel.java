@@ -1,5 +1,7 @@
 package se.mau.aj9191.assignment_1;
 
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -63,7 +65,7 @@ public class MainViewModel extends ViewModel
     private final SingleLiveEvent<Boolean> getGroupsEvent = new SingleLiveEvent<>();
 
     private final SingleLiveEvent<Location> locationEvent = new SingleLiveEvent<>();
-    private final SingleLiveEvent<Pair<String, Location[]>> locationsEvent = new SingleLiveEvent<>(); // group, locations
+    private final SingleLiveEvent<String> locationsEvent = new SingleLiveEvent<>(); // group, locations
 
     private final SingleLiveEvent<Group> viewableEvent = new SingleLiveEvent<>();
 
@@ -106,7 +108,37 @@ public class MainViewModel extends ViewModel
     }
     public void postLocations(String groupName, Location[] locations)
     {
-        this.locationsEvent.postValue(new Pair<>(groupName, locations));
+        Group group = getGroup(groupName);
+
+        if (group != null)
+        {
+            for (int i = group.getMarkers().size() - 1; i >= 0; --i)
+            {
+                NormalMarker normalMarker = group.getMarkers().get(i);
+                if (normalMarker.getType() == NormalMarker.NORMAL_MARKER)
+                    group.removeMarker(i);
+            }
+
+            for (Location location : locations)
+            {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+
+                if (Double.isNaN(latitude) || Double.isNaN(longitude))
+                    continue;
+
+                NormalMarker normalMarker = new NormalMarker();
+                normalMarker.latitude = latitude;
+                normalMarker.longitude = longitude;
+                normalMarker.title = groupName + ": " + location.getMember();
+                normalMarker.snippet = location.getMember() + " last recorded location";
+                normalMarker.visible = group.viewable;
+
+                group.addMarker(normalMarker);
+            }
+        }
+
+        this.locationsEvent.postValue(groupName);
     }
 
     public void postViewable(Group group)
@@ -139,7 +171,17 @@ public class MainViewModel extends ViewModel
 
         if (group != null)
         {
+            ImageMarker imageMarker = new ImageMarker();
+            imageMarker.latitude = imageMessage.latitude;
+            imageMarker.longitude = imageMessage.longitude;
+            imageMarker.title = group.getName() + ": " + imageMessage.username;
+            imageMarker.anchorX = 0.5f;
+            imageMarker.anchorY = 1.0f;
+            imageMarker.imageMessage = imageMessage;
+
+            group.addMarker(imageMarker);
             group.addMessage(imageMessage);
+
             this.imageMessageEvent.postValue(imageMessage);
         }
     }
@@ -166,7 +208,7 @@ public class MainViewModel extends ViewModel
     {
         return locationEvent;
     }
-    public LiveData<Pair<String, Location[]>> getLocationsLiveData()
+    public LiveData<String> getLocationsLiveData()
     {
         return locationsEvent;
     }
