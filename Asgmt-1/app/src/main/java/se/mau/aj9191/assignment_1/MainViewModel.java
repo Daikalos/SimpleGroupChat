@@ -104,8 +104,6 @@ public class MainViewModel extends ViewModel
 
     public void postLocation(Location location)
     {
-        Log.d("error", location.getLatitude() + " : " + location.getLongitude());
-
         this.location = new LatLng(location.getLatitude(), location.getLongitude());
         this.locationEvent.postValue(location);
     }

@@ -44,6 +44,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -308,8 +310,14 @@ public class ChatFragment extends Fragment
 
             if (mainActivity != null)
             {
-                mainActivity.getController()
-                        .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, viewModel.getLocation().longitude, viewModel.getLocation().latitude));
+                LatLng location = viewModel.getLocation();
+                if (!Double.isNaN(location.latitude) && !Double.isNaN(location.longitude))
+                {
+                    mainActivity.getController()
+                            .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, location.longitude, location.latitude));
+                }
+                else
+                    Toast.makeText(getContext(), "your location is currently NaN", Toast.LENGTH_SHORT).show();
             }
 
         });

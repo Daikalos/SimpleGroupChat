@@ -2,6 +2,7 @@ package se.mau.aj9191.assignment_1;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -20,6 +21,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -68,8 +72,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private HashMap<String, ArrayList<MarkerContents>> mapMarkerContents;
 
     private boolean languageSet = false;
-
-    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     @SuppressLint("MissingPermission")
     @Override
@@ -140,22 +142,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         map = googleMap;
+        map.setOnMarkerClickListener(this);
 
         requestPermissions();
-
-        for (String groupName : mapMarkerContents.keySet()) // add back all markers
-        {
-            ArrayList<MarkerContents> markerOptions = mapMarkerContents.get(groupName);
-            mapMarkers.put(groupName, new ArrayList<>(markerOptions.size()));
-
-            for (MarkerContents mo : markerOptions)
-            {
-                Marker marker = map.addMarker(mo.getMarkerOptions());
-                marker.setTag(mo.imageMessage);
-
-                mapMarkers.get(groupName).add(marker);
-            }
-        }
+        loadMarkers();
     }
 
     private void initializeComponents(View view, Bundle savedInstanceState)
@@ -284,25 +274,56 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         if (imageMessage == null)
             return false;
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(8, 8, 8, 8);
+        layout.setLayoutParams(new LinearLayout.LayoutParams(
+                280, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        ImageView ivPicture = new ImageView(getContext());
+        TextView tvDesc = new TextView(getContext());
+
+        int color = ContextCompat.getColor(getContext(), R.color.black);
+
+        ivPicture.setAdjustViewBounds(true);
+        ivPicture.setPadding(0, 0, 0, 8);
+
+        tvDesc.setTextColor(color);
+        tvDesc.setTextSize(24);
+
+        ivPicture.setImageBitmap(imageMessage.bitmap);
+        tvDesc.setText(imageMessage.message);
+
+        builder.setPositiveButton("OK", null);
+
+        layout.addView(ivPicture);
+        layout.addView(tvDesc);
+
+        AlertDialog dialog = builder.create();
+        dialog.setView(layout);
+
+        dialog.show();
 
         return true;
     }
 
-    private void requestPermissions()
+    private void loadMarkers()
     {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        for (String groupName : mapMarkerContents.keySet()) // add back all markers on rotation
         {
-            map.setMyLocationEnabled(true);
-        }
+            ArrayList<MarkerContents> markerOptions = mapMarkerContents.get(groupName);
+            mapMarkers.put(groupName, new ArrayList<>(markerOptions.size()));
 
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-        else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-        else
-            locationPermission.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION });
+            for (MarkerContents mo : markerOptions)
+            {
+                Marker marker = map.addMarker(mo.getMarkerOptions());
+                marker.setTag(mo.imageMessage);
+
+                mapMarkers.get(groupName).add(marker);
+            }
+        }
     }
 
     private void clearMarkers(String groupName)
@@ -319,49 +340,60 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private void addImageMarkers()
     {
-        executorService.execute(() ->
+        for (int i = 0; i < viewModel.getGroupsSize(); ++i)
         {
-            for (int i = 0; i < viewModel.getGroupsSize(); ++i)
+            Group group = viewModel.getGroup(i);
+            for (TextMessage message : group.getMessages())
             {
-                Group group = viewModel.getGroup(i);
-                for (TextMessage message : group.getMessages())
+                if (message.getType() == TextMessage.TEXT_TYPE)
+                    continue;
+
+                ImageMessage imageMessage = (ImageMessage)message;
+                Bitmap bitmap = imageMessage.bitmap;
+
+                if (bitmap == null)
+                    continue;
+
+                Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 64, 64);
+
+                MarkerContents markerContents = new MarkerContents();
+                markerContents.latitude = imageMessage.latitude;
+                markerContents.longitude = imageMessage.longitude;
+                markerContents.title = imageMessage.username;
+                markerContents.icon = thumbnail;
+                markerContents.anchorX = 0.5f;
+                markerContents.anchorY = 1.0f;
+                markerContents.imageMessage = imageMessage;
+
+                Marker marker = map.addMarker(markerContents.getMarkerOptions());
+                marker.setTag(markerContents.imageMessage);
+
+                if (!mapMarkers.containsKey(message.groupName))
                 {
-                    if (message.getType() == TextMessage.TEXT_TYPE)
-                        continue;
-
-                    ImageMessage imageMessage = (ImageMessage)message;
-                    Bitmap bitmap = imageMessage.bitmap;
-
-                    if (bitmap == null)
-                        continue;
-
-                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(bitmap, 64, 64);
-
-                    MarkerContents markerContents = new MarkerContents();
-                    markerContents.latitude = imageMessage.latitude;
-                    markerContents.longitude = imageMessage.longitude;
-                    markerContents.icon = thumbnail;
-                    markerContents.anchorX = 0.5f;
-                    markerContents.anchorY = 1.0f;
-                    markerContents.imageMessage = imageMessage;
-
-                    mainActivity.runOnUiThread(() ->
-                    {
-                        Marker marker = map.addMarker(markerContents.getMarkerOptions());
-                        marker.setTag(markerContents.imageMessage);
-
-                        if (!mapMarkers.containsKey(message.groupName))
-                        {
-                            mapMarkers.put(message.groupName, new ArrayList<>());
-                            mapMarkerContents.put(message.groupName, new ArrayList<>());
-                        }
-
-                        mapMarkers.get(message.groupName).add(marker);
-                        mapMarkerContents.get(message.groupName).add(markerContents);
-                    });
+                    mapMarkers.put(message.groupName, new ArrayList<>());
+                    mapMarkerContents.put(message.groupName, new ArrayList<>());
                 }
+
+                mapMarkers.get(message.groupName).add(marker);
+                mapMarkerContents.get(message.groupName).add(markerContents);
             }
-        });
+        }
+    }
+
+    private void requestPermissions()
+    {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            map.setMyLocationEnabled(true);
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+        else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
+        else
+            locationPermission.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION });
     }
 
     @Override
