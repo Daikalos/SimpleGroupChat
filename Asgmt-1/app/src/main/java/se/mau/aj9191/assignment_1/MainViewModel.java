@@ -58,14 +58,14 @@ public class MainViewModel extends ViewModel
 
     // --- EVENTS ---
 
-    private final SingleLiveEvent<Group> registerEvent = new SingleLiveEvent<>(); // id, group
+    private final SingleLiveEvent<Group> registerEvent = new SingleLiveEvent<>(); 
     private final SingleLiveEvent<String> unregisterEvent = new SingleLiveEvent<>();
 
     private final SingleLiveEvent<Boolean> getMembersEvent = new SingleLiveEvent<>();
     private final SingleLiveEvent<Boolean> getGroupsEvent = new SingleLiveEvent<>();
 
     private final SingleLiveEvent<Location> locationEvent = new SingleLiveEvent<>();
-    private final SingleLiveEvent<String> locationsEvent = new SingleLiveEvent<>(); // group, locations
+    private final SingleLiveEvent<String> locationsEvent = new SingleLiveEvent<>();
 
     private final SingleLiveEvent<Group> viewableEvent = new SingleLiveEvent<>();
 
