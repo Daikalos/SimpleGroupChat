@@ -37,9 +37,6 @@ public class MainViewModel extends ViewModel
     }
     public Group getGroup(String groupName)
     {
-        if (groupName == null || groupName.isEmpty())
-            return null;
-
         return joinedGroups.stream().filter(o -> groupName.equals(o.getName())).findFirst().orElse(null);
     }
 

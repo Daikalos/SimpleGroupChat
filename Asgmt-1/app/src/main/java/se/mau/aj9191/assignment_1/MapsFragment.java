@@ -345,7 +345,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             Group group = viewModel.getGroup(i);
             for (TextMessage message : group.getMessages())
             {
-                if (message.getType() == TextMessage.TEXT_TYPE)
+                if (message.getType() != TextMessage.IMAGE_TYPE)
                     continue;
 
                 ImageMessage imageMessage = (ImageMessage)message;
@@ -383,7 +383,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private void requestPermissions()
     {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             map.setMyLocationEnabled(true);
         }
@@ -468,19 +468,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         }
 
-        protected MarkerContents(Parcel in)
-        {
-            latitude = in.readDouble();
-            longitude = in.readDouble();
-            title = in.readString();
-            snippet = in.readString();
-            anchorX = in.readFloat();
-            anchorY = in.readFloat();
-            visible = in.readInt() != 0;
-            icon = in.readParcelable(Bitmap.class.getClassLoader());
-            imageMessage = in.readParcelable(ImageMessage.class.getClassLoader());
-        }
-
         public MarkerOptions getMarkerOptions()
         {
             MarkerOptions markerOptions = new MarkerOptions();
@@ -499,6 +486,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             markerOptions.visible(visible);
 
             return markerOptions;
+        }
+
+        protected MarkerContents(Parcel in)
+        {
+            latitude = in.readDouble();
+            longitude = in.readDouble();
+            title = in.readString();
+            snippet = in.readString();
+            anchorX = in.readFloat();
+            anchorY = in.readFloat();
+            visible = in.readInt() != 0;
+            icon = in.readParcelable(Bitmap.class.getClassLoader());
+            imageMessage = in.readParcelable(ImageMessage.class.getClassLoader());
         }
 
         @Override

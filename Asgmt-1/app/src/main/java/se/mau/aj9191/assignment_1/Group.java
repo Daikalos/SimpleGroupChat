@@ -20,8 +20,6 @@ public class Group implements Parcelable
     private ArrayList<TextMessage> messages = new ArrayList<>();
     private ArrayList<String> members = new ArrayList<>();
 
-    private HashMap<String, ImageMessage> images = new HashMap<>();
-
     public Group(String id, String name)
     {
         this.id = id;
@@ -57,11 +55,6 @@ public class Group implements Parcelable
     public void addMember(String member)
     {
         members.add(member);
-    }
-
-    public void addImage(String id, Bitmap image)
-    {
-
     }
 
     public Group(Parcel in)
