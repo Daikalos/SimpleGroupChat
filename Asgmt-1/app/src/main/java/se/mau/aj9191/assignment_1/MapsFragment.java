@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -133,7 +134,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         map.setOnMarkerClickListener(this);
 
         requestPermissions();
-        loadMarkers();
+
+        for (int i = viewModel.getGroupsSize() - 1; i >= 0; --i)
+            loadMarkers(viewModel.getGroup(i));
     }
 
     private void initializeComponents(View view, Bundle savedInstanceState)
@@ -177,7 +180,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
     private void addObservers()
     {
-        viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), this::showMarkers);
+        viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupName ->
+        {
+            clearMarkers(groupName);
+            loadMarkers(viewModel.getGroup(groupName));
+        });
 
         viewModel.getViewableLiveData().observe(getViewLifecycleOwner(), group ->
         {
@@ -189,37 +196,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                     marker.setVisible(group.viewable);
             }
         });
-    }
-
-    private void showMarkers(String groupName)
-    {
-        clearMarkers(groupName);
-
-        Group group = viewModel.getGroup(groupName);
-
-        if (group == null)
-            return;
-
-        ArrayList<NormalMarker> markers = group.getMarkers();
-
-        if (!mapMarkers.containsKey(groupName))
-            mapMarkers.put(groupName, new ArrayList<>(markers.size()));
-
-        for (NormalMarker normalMarker : markers)
-        {
-            double longitude = normalMarker.longitude;
-            double latitude = normalMarker.latitude;
-
-            if (Double.isNaN(longitude) || Double.isNaN(latitude))
-                continue;
-
-            Marker marker = map.addMarker(normalMarker.getMarkerOptions());
-
-            if (normalMarker.getType() == NormalMarker.IMAGE_MARKER)
-                marker.setTag(((ImageMarker)normalMarker).imageMessage);
-
-            mapMarkers.get(groupName).add(marker);
-        }
     }
 
     @Override
@@ -237,6 +213,42 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             mainActivity.getController()
                     .sendMessage(JsonHelper.sendLocation(group.getId(), longitude, latitude));
         }
+    }
+
+    private void loadMarkers(Group group)
+    {
+        if (group == null)
+            return;
+
+        ArrayList<NormalMarker> markers = group.getMarkers();
+        mapMarkers.put(group.getName(), new ArrayList<>(markers.size()));
+
+        for (NormalMarker normalMarker : markers)
+        {
+            double longitude = normalMarker.longitude;
+            double latitude = normalMarker.latitude;
+
+            if (Double.isNaN(longitude) || Double.isNaN(latitude))
+                continue;
+
+            Marker marker = map.addMarker(normalMarker.getMarkerOptions());
+
+            if (normalMarker.getType() == NormalMarker.IMAGE_MARKER)
+                marker.setTag(((ImageMarker)normalMarker).imageMessage);
+
+            mapMarkers.get(group.getName()).add(marker);
+        }
+    }
+
+    private void clearMarkers(String groupName)
+    {
+        if (!mapMarkers.containsKey(groupName))
+            return;
+
+        for (Marker marker : mapMarkers.get(groupName))
+            marker.remove();
+
+        mapMarkers.get(groupName).clear();
     }
 
     @Override
@@ -261,6 +273,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         int color = ContextCompat.getColor(getContext(), R.color.black);
 
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(256, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.CENTER;
+        ivPicture.setLayoutParams(params);
+
         ivPicture.setAdjustViewBounds(true);
         ivPicture.setPadding(0, 0, 0, 8);
 
@@ -282,38 +298,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dialog.show();
 
         return true;
-    }
-
-    private void loadMarkers()
-    {
-        for (int i = 0; i < viewModel.getGroupsSize(); ++i)
-        {
-            Group group = viewModel.getGroup(i);
-
-            ArrayList<NormalMarker> markerOptions = group.getMarkers();
-            mapMarkers.put(group.getName(), new ArrayList<>(markerOptions.size()));
-
-            for (NormalMarker normalMarker : markerOptions)
-            {
-                Marker marker = map.addMarker(normalMarker.getMarkerOptions());
-
-                if (normalMarker.getType() == NormalMarker.IMAGE_MARKER)
-                    marker.setTag(((ImageMarker)normalMarker).imageMessage);
-
-                mapMarkers.get(group.getName()).add(marker);
-            }
-        }
-    }
-
-    private void clearMarkers(String groupName)
-    {
-        if (!mapMarkers.containsKey(groupName))
-            return;
-
-        for (Marker marker : mapMarkers.get(groupName))
-            marker.remove();
-
-        mapMarkers.get(groupName).clear();
     }
 
     private void requestPermissions()
