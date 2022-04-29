@@ -16,4 +16,16 @@
     <string name="btn_language">ENGELSKA</string>
     <string name="placeholder_textchat">meddelande</string>
     <string name="desc_uploadedImage">bild laddad upp av en användare</string>
+    <string name="error_image_load">fel när bilden laddades</string>
+    <string name="error_empty">tom sträng</string>
+    <string name="btn_cancel">Avbryt</string>
+    <string name="title_create_group">Skapa grupp</string>
+    <string name="hint_enter_group_name">ange grupp namn</string>
+    <string name="hint_enter_user_name">ange användarnamn</string>
+    <string name="title_enter_group">Gå med grupp</string>
+    <string name="error_connect_socket">kan inte ansluta till socket</string>
+    <string name="hint_enter_description">ange beskrivning</string>
+    <string name="error_location">din nuvarande plats är NaN</string>
+    <string name="title_image_description">Bild beskrivning</string>
+    <string name="error_permissions">saknar tillstånd</string>
 </resources>

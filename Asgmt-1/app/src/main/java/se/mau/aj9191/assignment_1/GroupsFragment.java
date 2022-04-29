@@ -108,10 +108,10 @@ public class GroupsFragment extends Fragment
             layout.setPadding(32, 32, 32, 32);
 
             EditText edGroup = new EditText(getContext());
-            edGroup.setHint("enter group name");
+            edGroup.setHint(R.string.hint_enter_group_name);
 
             EditText edUsername = new EditText(getContext());
-            edUsername.setHint("enter user name");
+            edUsername.setHint(R.string.hint_enter_user_name);
 
             builder.setPositiveButton("OK", (dialogInterface, i) ->
             {
@@ -120,7 +120,7 @@ public class GroupsFragment extends Fragment
 
                 if (groupName.isEmpty() || username.isEmpty())
                 {
-                    Toast.makeText(requireContext(), "empty string", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.error_empty, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -134,13 +134,13 @@ public class GroupsFragment extends Fragment
                             .addToBackStack(null).commit();
                 }
             });
-            builder.setNegativeButton("Cancel", null);
+            builder.setNegativeButton(R.string.btn_cancel, null);
 
             layout.addView(edGroup);
             layout.addView(edUsername);
 
             AlertDialog dialog = builder.create();
-            dialog.setTitle("Create group");
+            dialog.setTitle(R.string.title_create_group);
             dialog.setView(layout);
 
             dialog.show();

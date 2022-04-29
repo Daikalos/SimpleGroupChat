@@ -28,7 +28,6 @@ public class NetworkService extends Service
     private final IBinder binder = new NetworkBinder();
 
     private Socket socket;
-    private InetAddress address;
 
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -177,7 +176,6 @@ public class NetworkService extends Service
                 while (isReceiving)
                 {
                     receiveString = dataInputStream.readUTF();
-
                     synchronized (object)
                     {
                         object.notifyAll();

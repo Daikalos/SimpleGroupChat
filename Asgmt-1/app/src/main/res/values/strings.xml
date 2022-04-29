@@ -16,4 +16,16 @@
     <string name="btn_language">SWEDISH</string>
     <string name="placeholder_textchat">message</string>
     <string name="desc_uploadedImage">image uploaded by user</string>
+    <string name="error_image_load">error loading image</string>
+    <string name="error_empty">empty string</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="title_create_group">Create group</string>
+    <string name="hint_enter_group_name">enter group name</string>
+    <string name="hint_enter_user_name">enter user name</string>
+    <string name="title_enter_group">Enter group</string>
+    <string name="error_connect_socket">unable to connect to socket</string>
+    <string name="hint_enter_description">enter description</string>
+    <string name="error_location">your location is currently NaN</string>
+    <string name="title_image_description">Image description</string>
+    <string name="error_permissions">missing permissions</string>
 </resources>

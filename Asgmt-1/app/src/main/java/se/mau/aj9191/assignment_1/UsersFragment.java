@@ -201,7 +201,7 @@ public class UsersFragment extends Fragment
         layout.setPadding(32, 32, 32, 32);
 
         EditText edUsername = new EditText(getContext());
-        edUsername.setHint("enter user name");
+        edUsername.setHint(R.string.hint_enter_user_name);
 
         builder.setPositiveButton("OK", (dialogInterface, i) ->
         {
@@ -209,7 +209,7 @@ public class UsersFragment extends Fragment
 
             if (username.isEmpty())
             {
-                Toast.makeText(requireContext(), "empty string", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.error_empty, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -219,12 +219,12 @@ public class UsersFragment extends Fragment
                         .sendMessage(JsonHelper.sendRegister(groupName, username));
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(R.string.btn_cancel, null);
 
         layout.addView(edUsername);
 
         AlertDialog dialog = builder.create();
-        dialog.setTitle("Enter group");
+        dialog.setTitle(R.string.title_enter_group);
         dialog.setView(layout);
 
         dialog.show();

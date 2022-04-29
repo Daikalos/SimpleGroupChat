@@ -110,7 +110,7 @@ public class ChatFragment extends Fragment
             if (camera && write && read)
                 accessCamera = true;
             else
-                Toast.makeText(getContext(), "need permissions to upload", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.error_permissions, Toast.LENGTH_SHORT).show();
         });
 
         takePicture = registerForActivityResult(new ActivityResultContracts.TakePicture(), result ->
@@ -281,7 +281,7 @@ public class ChatFragment extends Fragment
                 e.printStackTrace();
                 getActivity().runOnUiThread(() ->
                 {
-                    Toast.makeText(getContext(), "unable to connect to socket", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.error_connect_socket, Toast.LENGTH_SHORT).show();
                 });
             }
         });
@@ -296,7 +296,7 @@ public class ChatFragment extends Fragment
         layout.setPadding(32, 32, 32, 32);
 
         EditText edMessage = new EditText(getContext());
-        edMessage.setHint("enter description");
+        edMessage.setHint(R.string.hint_enter_description);
 
         builder.setPositiveButton("OK", (dialogInterface, i) ->
         {
@@ -304,7 +304,7 @@ public class ChatFragment extends Fragment
 
             if (message.isEmpty())
             {
-                Toast.makeText(requireContext(), "empty string", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.error_empty, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -317,16 +317,16 @@ public class ChatFragment extends Fragment
                             .sendMessage(JsonHelper.sendEnterImage(group.getId(), message, location.longitude, location.latitude));
                 }
                 else
-                    Toast.makeText(getContext(), "your location is currently NaN", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.error_location, Toast.LENGTH_SHORT).show();
             }
 
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(R.string.btn_cancel, null);
 
         layout.addView(edMessage);
 
         AlertDialog dialog = builder.create();
-        dialog.setTitle("Image description");
+        dialog.setTitle(R.string.title_image_description);
         dialog.setView(layout);
 
         dialog.show();

@@ -19,7 +19,6 @@ public class Group implements Parcelable
 
     private ArrayList<TextMessage> messages = new ArrayList<>();
     private ArrayList<String> members = new ArrayList<>();
-
     private ArrayList<NormalMarker> markers = new ArrayList<>();
 
     public Group(String id, String name)

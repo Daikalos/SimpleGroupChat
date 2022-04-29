@@ -217,7 +217,7 @@ public class ChatAdapter extends RecyclerView.Adapter
                     if (downloadArray.length == 0)
                     {
                         ((MainActivity)context).runOnUiThread(() ->
-                                Toast.makeText(context, "error loading image", Toast.LENGTH_SHORT).show());
+                                Toast.makeText(context, R.string.error_image_load, Toast.LENGTH_SHORT).show());
                         return;
                     }
 
@@ -235,7 +235,7 @@ public class ChatAdapter extends RecyclerView.Adapter
                 catch (Exception e)
                 {
                     e.printStackTrace();
-                    Toast.makeText(context, "Picture no longer available", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_image_load, Toast.LENGTH_SHORT).show();
                 }
             });
         }
