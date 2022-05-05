@@ -35,7 +35,8 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.GroupsHold
     @Override
     public void onBindViewHolder(@NonNull GroupsHolder groupHolder, int position)
     {
-        groupHolder.getGroupNameView().setText(groups.get(position).getName());
+        if (position >= 0 && position < groups.size())
+            groupHolder.getGroupNameView().setText(groups.get(position).getName());
     }
 
     @Override

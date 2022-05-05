@@ -151,6 +151,7 @@ public class GroupsFragment extends Fragment
     {
         viewModel.getGroupsLiveData().observe(getViewLifecycleOwner(), b ->
         {
+            rvGroups.getRecycledViewPool().clear();
             groupsAdapter.notifyDataSetChanged();
         });
     }

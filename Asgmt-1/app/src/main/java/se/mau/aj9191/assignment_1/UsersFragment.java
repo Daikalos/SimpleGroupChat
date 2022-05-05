@@ -188,6 +188,7 @@ public class UsersFragment extends Fragment
 
         viewModel.getMembersLiveData().observe(getViewLifecycleOwner(), b ->
         {
+            rvUsers.getRecycledViewPool().clear();
             usersAdapter.notifyDataSetChanged();
         });
     }
