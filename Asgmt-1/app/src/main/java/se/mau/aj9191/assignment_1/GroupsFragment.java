@@ -72,7 +72,7 @@ public class GroupsFragment extends Fragment
     @Override
     public void onResume()
     {
-        super.onResume();;
+        super.onResume();
 
         if (mainActivity != null)
         {

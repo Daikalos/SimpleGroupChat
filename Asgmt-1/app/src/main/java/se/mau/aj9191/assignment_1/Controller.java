@@ -27,6 +27,7 @@ public class Controller
 
         if (savedInstanceState == null)
             mainActivity.startService(intent);
+
         mainActivity.bindService(intent, serviceConnection, 0);
     }
 
@@ -43,7 +44,8 @@ public class Controller
 
     public void sendMessage(String message)
     {
-        networkService.sendMessage(message);
+        if (bound)
+            networkService.sendMessage(message);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection()

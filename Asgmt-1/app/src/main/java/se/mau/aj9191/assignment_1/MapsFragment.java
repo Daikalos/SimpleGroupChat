@@ -93,7 +93,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
             if (fine)
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-            else if (coarse)
+            if (coarse)
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
         });
 
@@ -182,6 +182,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     {
         viewModel.getLocationsLiveData().observe(getViewLifecycleOwner(), groupName ->
         {
+            if (map == null)
+                return;
+
             clearMarkers(groupName);
             loadMarkers(viewModel.getGroup(groupName));
         });
@@ -210,6 +213,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         for (int i = 0; i < viewModel.getGroupsSize(); ++i)
         {
             Group group = viewModel.getGroup(i);
+
             mainActivity.getController()
                     .sendMessage(JsonHelper.sendLocation(group.getId(), longitude, latitude));
         }
@@ -307,13 +311,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         {
             map.setMyLocationEnabled(true);
         }
+        else
+            locationPermission.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION });
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-        else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, this);
-        else
-            locationPermission.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION });
     }
 
     @Override

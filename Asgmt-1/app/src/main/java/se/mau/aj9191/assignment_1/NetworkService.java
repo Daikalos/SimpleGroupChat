@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 public class NetworkService extends Service
 {
-    public static final String IP = "192.168.0.9", PORT = "7117"; //= "195.178.227.53", PORT = "7117";
+    public static final String IP = "195.178.227.53", PORT = "7117";
     private final IBinder binder = new NetworkBinder();
 
     private Socket socket;
