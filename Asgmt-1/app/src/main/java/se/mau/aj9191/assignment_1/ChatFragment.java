@@ -299,6 +299,8 @@ public class ChatFragment extends Fragment
         EditText edMessage = new EditText(getContext());
         edMessage.setHint(R.string.hint_enter_description);
 
+        builder.setCancelable(false);
+
         builder.setPositiveButton("OK", (dialogInterface, i) ->
         {
             String message = edMessage.getText().toString();
