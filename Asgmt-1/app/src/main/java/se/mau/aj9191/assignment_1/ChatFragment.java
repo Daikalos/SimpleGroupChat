@@ -279,10 +279,11 @@ public class ChatFragment extends Fragment
             catch (Exception e)
             {
                 e.printStackTrace();
-                getActivity().runOnUiThread(() ->
+                if (mainActivity != null)
                 {
-                    Toast.makeText(getContext(), R.string.error_connect_socket, Toast.LENGTH_SHORT).show();
-                });
+                    mainActivity.runOnUiThread(() ->
+                            Toast.makeText(getContext(), R.string.error_connect_socket, Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
